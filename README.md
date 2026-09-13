@@ -7,8 +7,8 @@ features or custom UI yet.
 ## Tech stack
 
 - [Tauri 2](https://tauri.app/) — desktop shell (Rust backend + web frontend)
-- [React 19](https://react.dev/) + TypeScript + [Vite](https://vite.dev/) frontend (`src/`)
-- Rust backend (`src-tauri/`)
+- [React 19](https://react.dev/) + TypeScript + [Vite](https://vite.dev/) frontend
+- Rust backend with `tauri-plugin-shell` initialized sidecar-ready (no binaries yet)
 - npm + Cargo for package management
 
 App identity: `productName "ReNonce"`, identifier `com.renonce.app`.
@@ -23,7 +23,7 @@ App identity: `productName "ReNonce"`, identifier `com.renonce.app`.
 ## Getting started
 
 ```sh
-cd renonce
+cd renonce/lib/desktop
 npm install
 npm run tauri dev
 ```
@@ -50,36 +50,37 @@ Regenerate the OS app icons from the brand master:
 
 ```
 renonce/
-├── index.html              # blank shell, React mounts into #root
-├── vite.config.ts          # React plugin + Tauri dev server (port 1420)
-├── src/                    # React frontend
-│   ├── main.tsx            # bootstrap (StrictMode + App)
-│   ├── App.tsx             # blank root component
-│   ├── App.css             # minimal base styles
-│   ├── vite-env.d.ts
-│   └── assets/
-│       ├── renonce-icon.svg / renonce-lockup.svg  # import shortcuts
-│       └── (future components import from here)
-├── public/
-│   └── assets/brand/       # full ReNonce brand library (see its README)
-├── src-tauri/              # Rust backend + app config
-│   ├── tauri.conf.json     # borderless window (decorations: false)
-│   ├── Cargo.toml
-│   ├── capabilities/
-│   └── icons/              # generated OS icons (do not hand-edit)
-├── .github/                # CI workflow, issue templates, PR template
+├── lib/
+│   ├── README.md             # box overview + rules
+│   ├── desktop/              # Tauri desktop app (all commands run here)
+│   │   ├── index.html        # blank shell, React mounts into #root
+│   │   ├── vite.config.ts    # React plugin + Tauri dev server (port 1420)
+│   │   ├── src/              # React frontend (main.tsx, blank App.tsx, App.css)
+│   │   ├── public/assets/brand/  # full ReNonce brand library (see its README)
+│   │   └── src-tauri/        # Rust backend + config
+│   │       ├── tauri.conf.json   # borderless window (decorations: false)
+│   │       ├── capabilities/ # (no shell scopes yet — see lib/sidecars/)
+│   │       └── icons/        # generated OS icons (do not hand-edit)
+│   └── sidecars/             # audit tool sources (convention only, no tools yet)
+├── .github/                  # CI workflow, issue templates, PR template
 ├── README.md
-└── AGENT.md                # contributor guide for AI agents
+└── AGENT.md                  # contributor guide for AI agents
 ```
 
 ## Brand assets
 
-All ReNonce logos/icons live in `public/assets/brand/` (URL: `/assets/brand/...`)
-plus import shortcuts in `src/assets/`. Variants, actual pixel sizes, format
-guidance and usage rules are documented in
-[`public/assets/brand/README.md`](public/assets/brand/README.md).
+All ReNonce logos/icons live in `lib/desktop/public/assets/brand/`
+(URL: `/assets/brand/...`) plus import shortcuts in `lib/desktop/src/assets/`.
+Variants, actual pixel sizes, format guidance and usage rules are documented in
+[`lib/desktop/public/assets/brand/README.md`](lib/desktop/public/assets/brand/README.md).
 OS icons in `src-tauri/icons/` were generated from
 `ReNonce-Icon-1024x1024-1x.png` via `tauri icon`.
+
+## Sidecars
+
+Audit tools (Slither et al.) will ship as Tauri sidecars spawned by the Rust
+backend. Convention, wiring checklist and status:
+[`lib/sidecars/README.md`](lib/sidecars/README.md). No Python code yet.
 
 ## Recommended IDE setup
 

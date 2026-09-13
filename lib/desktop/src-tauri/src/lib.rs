@@ -14,11 +14,15 @@ fn greet(name: &str) -> String {
 }
 
 /// @notice Builds and runs the ReNonce Tauri application.
-/// @dev Registers the opener plugin and all invoke handlers, then blocks on the event loop.
+/// @dev Registers the opener + shell plugins and all invoke handlers, then blocks on the event loop.
+/// @dev The shell plugin is initialized sidecar-ready: no binaries are bundled yet, so no
+/// @dev `bundle.externalBin` entries or shell capability scopes exist. Add both when the first
+/// @dev tool lands in `lib/sidecars/` (see its README for the exact snippets).
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

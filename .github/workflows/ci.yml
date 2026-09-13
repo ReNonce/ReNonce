@@ -9,6 +9,10 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+defaults:
+  run:
+    working-directory: lib/desktop
+
 jobs:
   frontend:
     name: Typecheck
@@ -19,6 +23,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: lib/desktop/package-lock.json
       - run: npm ci
       - run: npx tsc --noEmit
 
@@ -43,12 +48,12 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: src-tauri
+          workspaces: lib/desktop/src-tauri
       - name: Check formatting
-        working-directory: src-tauri
+        working-directory: lib/desktop/src-tauri
         run: cargo fmt --all -- --check
       - name: Clippy (deny warnings)
-        working-directory: src-tauri
+        working-directory: lib/desktop/src-tauri
         run: cargo clippy --all-targets -- -D warnings
 
   build:
@@ -72,9 +77,10 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: lib/desktop/package-lock.json
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: src-tauri
+          workspaces: lib/desktop/src-tauri
       - run: npm ci
       - run: npm run tauri build
