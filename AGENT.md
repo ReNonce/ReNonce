@@ -14,7 +14,7 @@ UI focus). All docs and comments are in **English**.
 
 - Tauri 2 (Rust backend + React 19 + TS + Vite frontend, all under `lib/desktop/`)
 - `tauri-plugin-shell` initialized for future audit-tool sidecars (no tools yet)
-- npm + Cargo. App identity: `productName "ReNonce"`, `com.renonce.app`
+- npm + Cargo (Node v22 per `.nvmrc`). App identity: `productName "ReNonce"`, `com.renonce.app`
 - `@tauri-apps/api` for frontend-to-Rust calls; CLI via
   `lib/desktop/node_modules/.bin/tauri`
 

@@ -15,7 +15,7 @@ App identity: `productName "ReNonce"`, identifier `com.renonce.app`.
 
 ## Prerequisites
 
-- Node.js + npm
+- Node.js v22 (`nvm use`) + npm
 - Rust + Cargo
 - Tauri system dependencies for Linux (webkit2gtk et al. — see the
   [Tauri prerequisites guide](https://tauri.app/start/prerequisites/))
