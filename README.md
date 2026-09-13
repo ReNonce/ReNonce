@@ -51,17 +51,15 @@ Regenerate the OS app icons from the brand master:
 ```
 renonce/
 ├── lib/
-│   ├── README.md             # box overview + rules
-│   ├── desktop/              # Tauri desktop app (all commands run here)
+│   └── desktop/              # Tauri desktop app (all commands run here)
 │   │   ├── index.html        # blank shell, React mounts into #root
 │   │   ├── vite.config.ts    # React plugin + Tauri dev server (port 1420)
 │   │   ├── src/              # React frontend (main.tsx, blank App.tsx, App.css)
 │   │   ├── public/assets/brand/  # full ReNonce brand library (see its README)
 │   │   └── src-tauri/        # Rust backend + config
 │   │       ├── tauri.conf.json   # borderless window (decorations: false)
-│   │       ├── capabilities/ # (no shell scopes yet — see lib/sidecars/)
+│   │       ├── capabilities/ # (no shell scopes yet)
 │   │       └── icons/        # generated OS icons (do not hand-edit)
-│   └── sidecars/             # audit tool sources (convention only, no tools yet)
 ├── .github/                  # CI workflow, issue templates, PR template
 ├── README.md
 └── AGENT.md                  # contributor guide for AI agents
@@ -75,12 +73,6 @@ Variants, actual pixel sizes, format guidance and usage rules are documented in
 [`lib/desktop/public/assets/brand/README.md`](lib/desktop/public/assets/brand/README.md).
 OS icons in `src-tauri/icons/` were generated from
 `ReNonce-Icon-1024x1024-1x.png` via `tauri icon`.
-
-## Sidecars
-
-Audit tools (Slither et al.) will ship as Tauri sidecars spawned by the Rust
-backend. Convention, wiring checklist and status:
-[`lib/sidecars/README.md`](lib/sidecars/README.md). No Python code yet.
 
 ## Recommended IDE setup
 
