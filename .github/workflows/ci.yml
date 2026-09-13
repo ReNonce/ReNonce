@@ -11,7 +11,7 @@ env:
 
 defaults:
   run:
-    working-directory: lib/desktop
+    working-directory: apps/desktop
 
 jobs:
   frontend:
@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: lib/desktop/package-lock.json
+          cache-dependency-path: apps/desktop/package-lock.json
       - run: npm ci
       - run: npx tsc --noEmit
 
@@ -48,12 +48,12 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: lib/desktop/src-tauri
+          workspaces: apps/desktop/src-tauri
       - name: Check formatting
-        working-directory: lib/desktop/src-tauri
+        working-directory: apps/desktop/src-tauri
         run: cargo fmt --all -- --check
       - name: Clippy (deny warnings)
-        working-directory: lib/desktop/src-tauri
+        working-directory: apps/desktop/src-tauri
         run: cargo clippy --all-targets -- -D warnings
 
   build:
@@ -77,10 +77,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: lib/desktop/package-lock.json
+          cache-dependency-path: apps/desktop/package-lock.json
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: lib/desktop/src-tauri
+          workspaces: apps/desktop/src-tauri
       - run: npm ci
       - run: npm run tauri build

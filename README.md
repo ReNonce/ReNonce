@@ -23,7 +23,7 @@ App identity: `productName "ReNonce"`, identifier `com.renonce.app`.
 ## Getting started
 
 ```sh
-cd renonce/lib/desktop
+cd renonce/apps/desktop
 npm install
 npm run tauri dev
 ```
@@ -35,7 +35,7 @@ Repetitive workflows have wrappers in `script/` (runnable from anywhere):
 | `script/dev.sh` | dev window with hot-reload |
 | `script/build.sh` | production bundle |
 | `script/check.sh` | tsc + cargo fmt (fast CI gates) |
-| `script/install.sh` | `npm ci` in lib/desktop |
+| `script/install.sh` | `npm ci` in apps/desktop |
 | `script/icons.sh` | regenerate OS icons from brand master |
 | `script/clean.sh` | remove `dist/` + Rust `target/` |
 
@@ -61,7 +61,7 @@ Regenerate the OS app icons from the brand master:
 
 ```
 renonce/
-├── lib/
+├── apps/
 │   └── desktop/              # Tauri desktop app (all commands run here)
 │   │   ├── index.html        # blank shell, React mounts into #root
 │   │   ├── vite.config.ts    # React plugin + Tauri dev server (port 1420)
@@ -79,10 +79,10 @@ renonce/
 
 ## Brand assets
 
-All ReNonce logos/icons live in `lib/desktop/public/assets/brand/`
-(URL: `/assets/brand/...`) plus import shortcuts in `lib/desktop/src/assets/`.
+All ReNonce logos/icons live in `apps/desktop/public/assets/brand/`
+(URL: `/assets/brand/...`) plus import shortcuts in `apps/desktop/src/assets/`.
 Variants, actual pixel sizes, format guidance and usage rules are documented in
-[`lib/desktop/public/assets/brand/README.md`](lib/desktop/public/assets/brand/README.md).
+[`apps/desktop/public/assets/brand/README.md`](apps/desktop/public/assets/brand/README.md).
 OS icons in `src-tauri/icons/` were generated from
 `ReNonce-Icon-1024x1024-1x.png` via `tauri icon`.
 

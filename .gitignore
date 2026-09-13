@@ -1,4 +1,4 @@
-# Root hygiene (app lives in lib/desktop/, which has its own .gitignore)
+# Root hygiene (app lives in apps/desktop/, which has its own .gitignore)
 node_modules/
 dist/
 *.local

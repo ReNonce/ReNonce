@@ -3,6 +3,8 @@
  * @notice Blank scaffold. Future views (custom titlebar, navigation, audit views) go here.
  * @dev Keep this component free of template leftovers; new views go in dedicated components.
  */
+import "./App.css";
+
 function App() {
   return (
     <main>

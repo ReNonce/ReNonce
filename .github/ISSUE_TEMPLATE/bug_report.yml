@@ -41,7 +41,7 @@ body:
     attributes:
       label: App version
       description: Version from tauri.conf.json / release tag.
-      placeholder: 0.1.0
+      placeholder: 0.0.1
     validations:
       required: true
   - type: dropdown

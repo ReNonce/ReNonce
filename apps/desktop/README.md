@@ -1,7 +1,7 @@
 # ReNonce Desktop App
 
 The Tauri + React desktop application. All commands below run from this
-directory (`lib/desktop/`).
+directory (`apps/desktop/`).
 
 ## Stack
 

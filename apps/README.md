@@ -1,4 +1,4 @@
-# lib/
+# apps/
 
 Container for ReNonce code boxes. Each box is self-contained with its own
 toolchain and docs.

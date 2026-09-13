@@ -6,23 +6,23 @@ Follow this file before writing code or docs.
 ## 1. Project snapshot
 
 ReNonce is a planned **AI audit platform** shipped as a desktop app.
-Current state: **empty Tauri + React scaffold** in `lib/desktop/` — no audit features,
+Current state: **empty Tauri + React scaffold** in `apps/desktop/` — no audit features,
 blank frontend, borderless window. Shell plugin initialized (sidecar tooling postponed,
 UI focus). All docs and comments are in **English**.
 
 ## 2. Tech stack
 
-- Tauri 2 (Rust backend + React 19 + TS + Vite frontend, all under `lib/desktop/`)
+- Tauri 2 (Rust backend + React 19 + TS + Vite frontend, all under `apps/desktop/`)
 - `tauri-plugin-shell` initialized for future audit-tool sidecars (no tools yet)
 - npm + Cargo (Node v22 per `.nvmrc`). App identity: `productName "ReNonce"`, `com.renonce.app`
 - `@tauri-apps/api` for frontend-to-Rust calls; CLI via
-  `lib/desktop/node_modules/.bin/tauri`
+  `apps/desktop/node_modules/.bin/tauri`
 
 ## 3. Structure
 
 ```
 renonce/
-├── lib/
+├── apps/
 │   └── desktop/            # Tauri desktop app — ALL app commands run here
 │   │   ├── index.html      # blank shell, React mounts into #root
 │   │   ├── vite.config.ts  # React plugin + Tauri dev server (port 1420)
@@ -52,10 +52,10 @@ renonce/
 ## 4. Commands
 
 Prefer the `script/` wrappers (they resolve paths themselves). Raw equivalents
-run from `lib/desktop` (`src-tauri` for cargo).
+run from `apps/desktop` (`src-tauri` for cargo).
 
 ```sh
-cd lib/desktop
+cd apps/desktop
 npm install                                   # install JS deps
 npm run tauri dev                             # dev window (restart after ANY .conf.json change)
 npm run dev                                   # web-only dev, no desktop shell
@@ -65,7 +65,7 @@ npx tsc --noEmit                              # typecheck only
 ```
 
 ```sh
-cd lib/desktop/src-tauri
+cd apps/desktop/src-tauri
 cargo fmt --check                             # Rust syntax/format check (fast, no dep compile)
 ```
 
@@ -111,11 +111,11 @@ silently keeping them; never delete `DO NOT REMOVE` warnings.
 
 ## 6. Brand assets
 
-- Library: `lib/desktop/public/assets/brand/` — URL-ready at `/assets/brand/...`
+- Library: `apps/desktop/public/assets/brand/` — URL-ready at `/assets/brand/...`
   (Vite serves `public/` in dev and copies it to `dist/` on build).
   Variants, measured pixel sizes, format rules: brand `README.md`.
-- Component imports: `lib/desktop/src/assets/renonce-icon.svg`,
-  `lib/desktop/src/assets/renonce-lockup.svg`.
+- Component imports: `apps/desktop/src/assets/renonce-icon.svg`,
+  `apps/desktop/src/assets/renonce-lockup.svg`.
 - Artwork is **white**: opaque `ReNonce-Icon-*` works anywhere;
   transparent `Icon-only` / `icon-type` / `Type` are **dark-background only**.
 - OS icons: regenerate from the 1024 master via `tauri icon`,
@@ -137,7 +137,7 @@ silently keeping them; never delete `DO NOT REMOVE` warnings.
 
 - Don't add UI/features beyond what was asked; keep the scaffold clean.
 - Don't reintroduce template leftovers (Tauri greet demo, default logos/copy).
-- New views go in dedicated components under `lib/desktop/src/`; keep `App.tsx` thin.
+- New views go in dedicated components under `apps/desktop/src/`; keep `App.tsx` thin.
 - JSON files take no comments — document their quirks in NatSpec `@dev`
   notes of the code that consumes them.
 - After editing Rust run `cargo fmt --check`; after TS run `npx tsc --noEmit`.

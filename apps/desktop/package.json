@@ -1,7 +1,7 @@
 {
   "name": "renonce",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,6 +16,7 @@
     "@tauri-apps/plugin-opener": "^2"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^6.0.2",

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # @title ReNonce icon regeneration
-# @notice Regenerates lib/desktop/src-tauri/icons/ from the opaque brand master.
+# @notice Regenerates apps/desktop/src-tauri/icons/ from the opaque brand master.
 # @dev Never hand-edit src-tauri/icons/; rerun this script when the logo changes.
 # @dev Requires JS dependencies first (script/install.sh).
 set -euo pipefail
-APP="$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib/desktop" && pwd)"
+APP="$(cd "$(dirname "${BASH_SOURCE[0]}")/../apps/desktop" && pwd)"
 if [[ ! -x "$APP/node_modules/.bin/tauri" ]]; then
   echo "missing Tauri CLI, run script/install.sh first" >&2
   exit 1
