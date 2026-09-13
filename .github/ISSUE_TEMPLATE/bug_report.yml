@@ -1,0 +1,73 @@
+name: Bug report
+description: Report something broken in the ReNonce desktop app
+title: "[bug] "
+labels: [bug]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is broken?
+      placeholder: The window does not... / The app crashes when...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps that trigger the bug.
+      placeholder: |
+        1. Run `npm run tauri dev`
+        2. Click ...
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happens instead? Paste error messages or logs here.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Version from tauri.conf.json / release tag.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: OS
+      options:
+        - Linux
+        - Windows
+        - macOS
+    validations:
+      required: true
+  - type: input
+    id: os-detail
+    attributes:
+      label: OS detail
+      description: Distro + version, Windows build, or macOS version.
+      placeholder: Arch Linux / Ubuntu 24.04 / Windows 11 23H2 / macOS 15
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Terminal output, devtools console, or crash logs.
+      render: shell
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Screenshots, related issues, anything else.

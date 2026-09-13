@@ -1,0 +1,18 @@
+name: Question
+description: Ask about using or developing ReNonce
+title: "[question] "
+labels: [question]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What do you want to know?
+      placeholder: How do I...? / Why does...?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What you tried, relevant code, OS and app version.

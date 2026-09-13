@@ -1,0 +1,44 @@
+name: Feature request
+description: Propose a feature for the ReNonce AI audit platform
+title: "[feat] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What should ReNonce do?
+      placeholder: Add ... / Support ...
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Which audit workflow pain does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: How should it work? Component and Tauri command ideas welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches and why this one is better.
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Where does the change live?
+      multiple: true
+      options:
+        - Frontend (src/)
+        - Backend (src-tauri/)
+        - Brand assets
+        - Docs / CI
+        - Other
