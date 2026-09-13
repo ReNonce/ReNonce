@@ -66,7 +66,7 @@ renonce/
 │   │   ├── index.html        # blank shell, React mounts into #root
 │   │   ├── vite.config.ts    # React plugin + Tauri dev server (port 1420)
 │   │   ├── src/              # React frontend (main.tsx, blank App.tsx, App.css)
-│   │   ├── public/assets/brand/  # full ReNonce brand library (see its README)
+│   │   ├── public/assets/  # brand/ + themes/icons/fonts/sounds (see its README)
 │   │   └── src-tauri/        # Rust backend + config
 │   │       ├── tauri.conf.json   # borderless window (decorations: false)
 │   │       ├── capabilities/ # (no shell scopes yet)

@@ -38,7 +38,7 @@ desktop/
 │   ├── App.css         # minimal base styles
 │   └── assets/         # renonce-icon.svg / renonce-lockup.svg (imported)
 ├── public/
-│   └── assets/brand/   # full brand library, served at /assets/brand/...
+│   └── assets/          # brand/ + themes/icons/fonts/sounds, see its README
 └── src-tauri/
     ├── tauri.conf.json # borderless window (decorations: false)
     ├── capabilities/   # no shell scopes yet

@@ -31,7 +31,7 @@ renonce/
 │   │   │   ├── App.tsx     # blank root component (NatSpec JSDoc)
 │   │   │   ├── App.css     # minimal base styles (header comment)
 │   │   │   └── assets/     # renonce-icon.svg / renonce-lockup.svg shortcuts
-│   │   ├── public/assets/brand/  # full brand library + its own README.md
+│   │   ├── public/assets/  # brand/ + themes/icons/fonts/sounds + its own README.md
 │   │   └── src-tauri/
 │   │       ├── tauri.conf.json   # borderless window (JSON: no comments allowed)
 │   │       ├── Cargo.toml
