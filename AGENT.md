@@ -44,11 +44,15 @@ renonce/
 │   ├── workflows/ci.yml    # typecheck + fmt/clippy + Linux build
 │   ├── ISSUE_TEMPLATE/     # bug_report / feature_request / question forms
 │   └── pull_request_template.md
+├── script/                 # dev/build/check/install/icons/clean wrappers
 ├── README.md               # project readme
 └── AGENT.md                # this file
 ```
 
 ## 4. Commands
+
+Prefer the `script/` wrappers (they resolve paths themselves). Raw equivalents
+run from `lib/desktop` (`src-tauri` for cargo).
 
 ```sh
 cd lib/desktop

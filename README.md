@@ -28,6 +28,17 @@ npm install
 npm run tauri dev
 ```
 
+Repetitive workflows have wrappers in `script/` (runnable from anywhere):
+
+| Script | Does |
+|---|---|
+| `script/dev.sh` | dev window with hot-reload |
+| `script/build.sh` | production bundle |
+| `script/check.sh` | tsc + cargo fmt (fast CI gates) |
+| `script/install.sh` | `npm ci` in lib/desktop |
+| `script/icons.sh` | regenerate OS icons from brand master |
+| `script/clean.sh` | remove `dist/` + Rust `target/` |
+
 Web-only dev (no desktop shell): `npm run dev`. Release bundle:
 
 ```sh
@@ -61,6 +72,7 @@ renonce/
 │   │       ├── capabilities/ # (no shell scopes yet)
 │   │       └── icons/        # generated OS icons (do not hand-edit)
 ├── .github/                  # CI workflow, issue templates, PR template
+├── script/                   # dev/build/check/install/icons/clean wrappers
 ├── README.md
 └── AGENT.md                  # contributor guide for AI agents
 ```
