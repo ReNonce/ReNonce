@@ -536,7 +536,17 @@ export function FileExplorer() {
         label: "Open in Terminal",
         onSelect: () => openTerminal(targetDir, null),
       },
-      { id: "md-preview", label: "Open Markdown Preview", disabled: true },
+      {
+        id: "md-preview",
+        label: "Open Markdown Preview",
+        disabled: entry === null || !/\.(md|markdown|mdx)$/i.test(path),
+        onSelect: () => {
+          if (entry === null) {
+            return;
+          }
+          openFileTab(path, "preview");
+        },
+      },
       {
         id: "cut",
         label: "Cut",

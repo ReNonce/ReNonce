@@ -9,8 +9,10 @@
  */
 import { useEffect, useState } from "react";
 import { readFile, writeFile } from "../../../files/file-content";
+import { setTabMode } from "../../../terminal/sessions";
 import type { TerminalSession } from "../../../terminal/sessions";
 import { EditorSurface } from "../editor-surface/EditorSurface";
+import { MarkdownPreview } from "../markdown-preview/MarkdownPreview";
 import "./EditorView.css";
 
 export interface EditorViewProps {
@@ -62,6 +64,7 @@ export function EditorView({ session, active }: EditorViewProps) {
   };
 
   const directory = path.slice(0, Math.max(0, path.length - session.label.length));
+  const isMarkdown = /\.(md|markdown|mdx)$/i.test(path);
 
   return (
     <div className="editor-view" data-active={active} aria-hidden={!active}>
@@ -77,6 +80,26 @@ export function EditorView({ session, active }: EditorViewProps) {
         <span className="editor-view__path" title={path}>
           {directory === "" ? path : directory}
         </span>
+        {isMarkdown && (
+          <div className="editor-view__switch" role="group" aria-label="Editor view">
+            <button
+              type="button"
+              className="editor-view__switch-item"
+              aria-pressed={session.mode === "code"}
+              onClick={() => setTabMode(session.id, "code")}
+            >
+              Code
+            </button>
+            <button
+              type="button"
+              className="editor-view__switch-item"
+              aria-pressed={session.mode === "preview"}
+              onClick={() => setTabMode(session.id, "preview")}
+            >
+              View
+            </button>
+          </div>
+        )}
         <button
           type="button"
           className="editor-view__save"
@@ -91,6 +114,8 @@ export function EditorView({ session, active }: EditorViewProps) {
         <p className="editor-view__error">{error}</p>
       ) : contents === null ? (
         <p className="editor-view__empty">Loading…</p>
+      ) : session.mode === "preview" ? (
+        <MarkdownPreview contents={contents} />
       ) : (
         <div className="editor-view__surface">
           <EditorSurface

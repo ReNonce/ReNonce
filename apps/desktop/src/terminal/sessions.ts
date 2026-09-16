@@ -22,7 +22,12 @@ export interface TerminalSession {
   label: string;
   /** Absolute file path for editor tabs; null for terminal tabs. */
   path: string | null;
+  /** Editor tabs only: code editor or rendered preview. */
+  mode: TabMode;
 }
+
+/** Which view an editor tab shows. */
+export type TabMode = "code" | "preview";
 
 /** Whether a tab runs a shell rather than showing a file. */
 export function isTerminalTab(session: TerminalSession): boolean {
@@ -46,6 +51,7 @@ function createSession(cwd: string | null, shell: string | null): TerminalSessio
     // label is fixed at the start.
     label: shell === null ? labelFor(cwd) : folderName(shell),
     path: null,
+    mode: "code",
   };
 }
 
@@ -153,12 +159,14 @@ export function getActiveTerminalId(): string {
 /**
  * @notice Opens a file in a new tab, or focuses the tab already showing it.
  * @param path Absolute file path.
+ * @param mode Which view to show first (code or preview).
  * @return The editor tab's id.
  */
-export function openFileTab(path: string): string {
+export function openFileTab(path: string, mode: TabMode = "code"): string {
   const existing = sessions.find((session) => session.path === path);
   if (existing !== undefined) {
     setActiveTerminal(existing.id);
+    setTabMode(existing.id, mode);
     return existing.id;
   }
   counter += 1;
@@ -168,11 +176,28 @@ export function openFileTab(path: string): string {
     shell: null,
     label: folderName(path),
     path,
+    mode,
   };
   sessions = [...sessions, session];
   activeId = session.id;
   notify();
   return session.id;
+}
+
+/**
+ * @notice Switches an editor tab between the code editor and the preview.
+ * @param id Tab id; unknown ids are ignored.
+ * @param mode View to show.
+ */
+export function setTabMode(id: string, mode: TabMode): void {
+  const index = sessions.findIndex((session) => session.id === id);
+  if (index === -1 || sessions[index].mode === mode) {
+    return;
+  }
+  sessions = sessions.map((session, position) =>
+    position === index ? { ...session, mode } : session,
+  );
+  notify();
 }
 
 /**

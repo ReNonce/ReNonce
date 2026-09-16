@@ -54,6 +54,36 @@
   color: var(--muted-foreground);
 }
 
+.editor-view__switch {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 22px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 6px);
+}
+
+.editor-view__switch-item {
+  height: 100%;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.editor-view__switch-item + .editor-view__switch-item {
+  border-left: 1px solid var(--border);
+}
+
+.editor-view__switch-item[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
 .editor-view__save {
   flex: 0 0 auto;
   height: 22px;
