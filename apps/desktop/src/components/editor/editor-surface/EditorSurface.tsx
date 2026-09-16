@@ -22,6 +22,7 @@ import { sql } from "@codemirror/lang-sql";
 import { xml } from "@codemirror/lang-xml";
 import { yaml } from "@codemirror/lang-yaml";
 import { dockerFile } from "@codemirror/legacy-modes/mode/dockerfile";
+import { diff } from "@codemirror/legacy-modes/mode/diff";
 import { properties } from "@codemirror/legacy-modes/mode/properties";
 import { shell } from "@codemirror/legacy-modes/mode/shell";
 import { toml } from "@codemirror/legacy-modes/mode/toml";
@@ -84,8 +85,9 @@ const EDITOR_THEME = EditorView.theme({
 /**
  * Language support picked from the file name.
  * @dev Unknown extensions get no language (plain text). Filenames without an
- * extension are matched first, so `Dockerfile` still highlights; `properties`
- * doubles for ini-style config files.
+ * extension are matched first, so `Dockerfile` still highlights. Lock files are
+ * TOML in practice (Cargo.lock, poetry.lock) — `package-lock.json` is JSON by its
+ * own extension — and `properties` doubles for ini-style config files.
  */
 function languageFor(path: string): Extension {
   const filename = path.split(/[\\/]/).pop()?.toLowerCase() ?? "";
@@ -104,9 +106,11 @@ function languageFor(path: string): Extension {
       return javascript({ typescript: true, jsx: true });
     case "json":
     case "jsonc":
+    case "map":
       return json();
     case "md":
     case "markdown":
+    case "mdx":
       return markdown();
     case "rs":
       return rust();
@@ -138,12 +142,17 @@ function languageFor(path: string): Extension {
     case "zsh":
       return StreamLanguage.define(shell);
     case "toml":
+    case "lock":
       return StreamLanguage.define(toml);
     case "ini":
     case "cfg":
     case "conf":
     case "env":
+    case "properties":
       return StreamLanguage.define(properties);
+    case "diff":
+    case "patch":
+      return StreamLanguage.define(diff);
     default:
       return [];
   }
