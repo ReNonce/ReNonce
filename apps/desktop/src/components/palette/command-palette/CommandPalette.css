@@ -1,0 +1,59 @@
+/**
+ * @title Command palette styles
+ * @notice Add form revealed by the "+" beside the search field: label + scope on
+ * one row, the command field, and the submit button.
+ */
+
+.command-palette__form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 4px 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.command-palette__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.command-palette__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  appearance: none;
+}
+
+.command-palette__input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.command-palette__submit {
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.command-palette__submit:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.command-palette__submit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

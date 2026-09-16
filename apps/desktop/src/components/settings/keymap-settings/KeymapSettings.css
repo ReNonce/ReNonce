@@ -1,0 +1,117 @@
+/**
+ * @title Keymap settings styles
+ * @notice Rows of action + recorded binding + clear, following the theme
+ * section's surfaces and spacing.
+ * @dev The recording button switches to the accent surface while it waits for
+ * keys, so it is obvious which row is capturing.
+ */
+
+.keymap-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 880px;
+}
+
+.keymap-settings__group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.keymap-settings__title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.keymap-settings__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.keymap-settings__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.keymap-settings__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.keymap-settings__binding {
+  min-width: 120px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.keymap-settings__binding:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.keymap-settings__binding[aria-pressed="true"] {
+  border-color: var(--ring);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.keymap-settings__clear {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.keymap-settings__clear:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.keymap-settings__clear:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.keymap-settings__reset {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.keymap-settings__reset:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}

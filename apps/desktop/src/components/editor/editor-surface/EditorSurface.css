@@ -1,0 +1,12 @@
+/**
+ * @title Editor surface styles
+ * @notice Container for the CodeMirror view; the editor's own colors come from
+ * the theme extension in `EditorSurface.tsx`.
+ */
+
+.editor-surface {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}

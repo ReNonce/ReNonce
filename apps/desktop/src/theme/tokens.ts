@@ -7,7 +7,7 @@
  * intentionally not emitted as CSS variables — consumers (xterm) read them
  * from `useTheme().terminal`.
  */
-import type { ThemeColors } from "./types";
+import type { TerminalColors, ThemeColors } from "./types";
 
 /** Fallback for themes that omit the `radius` token. */
 export const DEFAULT_RADIUS = "0.5rem";
@@ -40,5 +40,24 @@ export function colorsToCssVars(colors: ThemeColors): Record<string, string> {
   if (vars["--radius"] === undefined) {
     vars["--radius"] = DEFAULT_RADIUS;
   }
+  return vars;
+}
+
+/**
+ * @notice Builds CSS custom properties for a variant's terminal palette.
+ * @dev Exposing ANSI as variables lets CSS-only surfaces (the editor's syntax
+ * theme) follow the active palette without React re-rendering — switching themes
+ * repaints highlighted code for free.
+ * @param terminal Terminal palette of the active variant.
+ * @return Map of CSS variable name to value, e.g. `{ "--ansi-4": "#007aff" }`.
+ */
+export function terminalToCssVars(terminal: TerminalColors): Record<string, string> {
+  const vars: Record<string, string> = {
+    "--ansi-cursor": terminal.cursor,
+    "--ansi-selection": terminal.selection,
+  };
+  terminal.ansi.forEach((color, index) => {
+    vars[`--ansi-${index}`] = color;
+  });
   return vars;
 }

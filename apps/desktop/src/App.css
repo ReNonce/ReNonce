@@ -16,9 +16,12 @@
   --font-mono: "Lilex", ui-monospace, SFMono-Regular, Menlo, monospace;
   --motion-duration: 220ms;
   --motion-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Shared width for dropdown overlays (Files menu, terminal + menu, …), so
+     they read as one family instead of sizing to their longest label. */
+  --overlay-width: 240px;
   font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 24px;
+  font-size: 14px;
+  line-height: 20px;
   font-weight: 400;
 }
 
@@ -26,6 +29,16 @@ html,
 body,
 #root {
   height: 100%;
+}
+
+/* Form controls do not inherit the document font by default; without this they
+   fall back to the platform UI font (Inter on some Linux setups) instead of the
+   app stack. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 body {

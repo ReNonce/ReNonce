@@ -1,0 +1,27 @@
+/**
+ * @title Command menu styles
+ * @notice Labeled pill trigger for the command palette, sized to match the
+ * terminal tab strip it sits beside.
+ */
+
+.command-menu__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.command-menu__button:hover,
+.command-menu__button[aria-expanded="true"] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}

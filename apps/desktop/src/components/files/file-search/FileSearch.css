@@ -1,0 +1,70 @@
+/**
+ * @title File search styles
+ * @notice Input row on the panel surface: a bordered field with the magnifier
+ * and the key binding hint inside it.
+ * @dev Stickiness lives on the explorer's sticky top block, which this row is
+ * part of, so search, quick actions, and the tree scroll independently.
+ */
+
+.file-search {
+  padding: 6px 8px;
+}
+
+.file-search__field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--sidebar-border);
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--sidebar-foreground);
+}
+
+.file-search__field:focus-within {
+  border-color: var(--sidebar-ring);
+}
+
+.file-search__field[data-disabled="true"] {
+  opacity: 0.6;
+}
+
+.file-search__icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  color: var(--muted-foreground);
+}
+
+.file-search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  appearance: none;
+}
+
+.file-search__input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.file-search__input::-webkit-search-decoration,
+.file-search__input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.file-search__shortcut {
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}

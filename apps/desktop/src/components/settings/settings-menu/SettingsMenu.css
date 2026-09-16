@@ -29,9 +29,9 @@
 .settings-menu__heading {
   margin: 0;
   padding: 0 2px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   opacity: 0.65;
 }
@@ -39,14 +39,14 @@
 .settings-menu__item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 6px 10px;
   border: 1px solid var(--sidebar-border);
   border-radius: var(--radius);
   background: transparent;
   color: inherit;
   font: inherit;
+  font-size: 13px;
   text-align: left;
   cursor: pointer;
 }

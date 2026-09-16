@@ -1,0 +1,18 @@
+/**
+ * @title Panel header styles
+ * @notice Band above a panel's content; VS Code-style single bottom border,
+ * matching the app top bar.
+ * @dev Carries no background of its own — it inherits the panel surface. The
+ * height and side padding live here, so one change resizes every panel header;
+ * content that does not fit is clipped instead of overflowing the panel.
+ */
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 40px;
+  padding: 0 5px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}

@@ -1,0 +1,94 @@
+/**
+ * @title Command row styles
+ * @notice Icon, growing label, and a right-aligned hint; hover or keyboard
+ * selection uses the accent surface. With `onRemove` the row is paired with a
+ * small remove control in a wrapper.
+ */
+
+.command-row__item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.command-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.command-row:hover,
+.command-row[data-active="true"] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.command-row:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.command-row__icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+}
+
+.command-row__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.command-row__hint {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+.command-row[data-active="true"] .command-row__hint {
+  color: inherit;
+}
+
+.command-row__remove {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  flex: 0 0 auto;
+  width: 28px;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.command-row__remove:hover {
+  background: var(--border);
+  color: var(--foreground);
+}

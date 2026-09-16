@@ -1,0 +1,150 @@
+/**
+ * @title Terminal tabs styles
+ * @notice Strip that scrolls horizontally once tabs overflow, with the "+" pinned
+ * after it so it never scrolls away.
+ * @dev The scrollbar is hidden on purpose (VS Code-style): the strip still
+ * scrolls with a wheel (the vertical wheel is mapped to horizontal in the
+ * component), trackpad, or keyboard. `flex: 0 0 auto` on the tabs is what makes
+ * overflow happen instead of squeezed labels. The fade overlaps the strip's last
+ * 28px so overflowing tabs leave softly; it is background coloured and sits
+ * between the strip and the "+", so the button is never dimmed.
+ */
+
+.terminal-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.terminal-tabs__strip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.terminal-tabs__strip::-webkit-scrollbar {
+  display: none;
+}
+
+.terminal-tabs__fade {
+  flex: 0 0 28px;
+  align-self: stretch;
+  margin-left: -28px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--background));
+}
+
+.terminal-tabs__item {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  max-width: 200px;
+  height: 28px;
+  padding: 0 3px 0 10px;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) - 2px);
+  color: var(--muted-foreground);
+}
+
+.terminal-tabs__item:hover {
+  color: var(--foreground);
+}
+
+.terminal-tabs__item[data-active="true"] {
+  border-color: var(--border);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.terminal-tabs__item[data-active="true"] .terminal-tabs__tab {
+  font-weight: 600;
+}
+
+.terminal-tabs__tab {
+  min-width: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.terminal-tabs__close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.terminal-tabs__close:hover {
+  background: var(--border);
+  opacity: 1;
+}
+
+.terminal-tabs__tab:focus-visible,
+.terminal-tabs__close:focus-visible,
+.terminal-tabs__add:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.terminal-tabs__add {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  margin-left: 2px;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.terminal-tabs__add:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.terminal-tabs__menu {
+  position: fixed;
+  z-index: 15;
+  box-sizing: border-box;
+  width: var(--overlay-width);
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 18%);
+}
+
+.terminal-tabs__menu-divider {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--border);
+}

@@ -1,0 +1,14 @@
+/**
+ * @title Terminal view styles
+ * @notice Positioning container for the stacked terminal surfaces; with no
+ * session it hosts the welcome block instead.
+ * @dev Surfaces are absolutely positioned inside it, so the element keeps a
+ * definite size (`height: 100%` inside the panel's flex content area).
+ */
+
+.terminal-view {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  background: var(--background);
+}

@@ -1,0 +1,197 @@
+/**
+ * @title File explorer styles
+ * @notice Rows on the panel's sidebar surface, a Quick action header with
+ * icon-only buttons, and the inline new-entry field.
+ * @dev Row padding-left is set inline per depth; the chevron slot is always
+ * present (empty for files) so icons line up.
+ */
+
+.file-explorer {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 4px;
+}
+
+/* Search, the Quick action header, and the new-entry field stick together at
+   the top; only the tree and search results scroll underneath them. */
+.file-explorer__top {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  background: var(--sidebar);
+}
+
+.file-explorer__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px 2px 10px;
+}
+
+.file-explorer__heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.file-explorer__divider {
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--border);
+}
+
+.file-explorer__action {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: calc(var(--radius) - 6px);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.file-explorer__action:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+.file-explorer__action:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.file-explorer__draft {
+  padding-right: 8px;
+  padding-bottom: 4px;
+}
+
+.file-explorer__draft-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--ring);
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.file-explorer__draft-input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.file-explorer__results {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.file-explorer__result {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.file-explorer__result:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+.file-explorer__chevron {
+  display: block;
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  color: var(--muted-foreground);
+  transition: transform 140ms var(--motion-easing, ease);
+}
+
+.file-explorer__chevron--open {
+  transform: rotate(90deg);
+}
+
+.file-explorer__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.file-explorer__row:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+/* Selected folder: the target for new entries, like VS Code's focused item. */
+.file-explorer__row[data-selected="true"] {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+  box-shadow: inset 2px 0 0 var(--sidebar-ring);
+}
+
+/* Folder under a dragged row. */
+.file-explorer__row[data-drag-over="true"] {
+  outline: 1px dashed var(--sidebar-ring);
+  outline-offset: -1px;
+}
+
+/* Cut entries, waiting for a Paste. */
+.file-explorer__row[data-cut="true"] {
+  opacity: 0.5;
+}
+
+.file-explorer__name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.file-explorer__empty {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted-foreground);
+}
+
+.file-explorer__error {
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--destructive);
+}

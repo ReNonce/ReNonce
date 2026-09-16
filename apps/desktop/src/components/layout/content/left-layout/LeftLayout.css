@@ -1,13 +1,35 @@
 /**
  * @title Left layout styles
  * @notice Side panel surface using the theme sidebar tokens.
- * @dev No side borders — the neighboring resizer paints the separator.
+ * @dev Column of header + scrolling content; no side borders — the
+ * neighboring resizer paints the separator. Only the content area scrolls, so
+ * the header stays put.
  */
 
 .left-layout {
+  display: flex;
+  flex-direction: column;
   flex: 0 0 auto;
   min-width: 0;
-  overflow: auto;
   background: var(--sidebar);
   color: var(--sidebar-foreground);
+}
+
+.left-layout__content {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: none;
+}
+
+.left-layout__content::-webkit-scrollbar {
+  display: none;
+}
+
+.left-layout__placeholder {
+  margin: 0;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted-foreground);
 }

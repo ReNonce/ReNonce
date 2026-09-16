@@ -4,7 +4,8 @@
  * window controls on the right; VS Code-style single bottom border.
  * @dev No top border — the bar touches the window edge. Window controls sit
  * flush against the top-right corner (per-OS placement is still open, see
- * AGENT.md §7).
+ * AGENT.md §7). The bar keeps `z-index` above the content row so menu
+ * dropdowns float over it instead of being clipped.
  */
 
 .top-bar-layout {
@@ -12,6 +13,8 @@
   align-items: center;
   gap: 2px;
   flex: 0 0 auto;
+  position: relative;
+  z-index: 5;
   height: 36px;
   padding-left: 8px;
   border-bottom: 1px solid var(--border);

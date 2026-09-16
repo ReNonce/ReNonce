@@ -1,8 +1,10 @@
 /**
  * @title Right layout
- * @notice Right content panel, separated from the center by a resizer.
+ * @notice Right content panel: its own top bar plus a scrolling content area,
+ * separated from the center by a resizer.
  * @dev Width is fully controlled by ContentLayout — never set it from CSS.
  */
+import { PanelHeader } from "../../panel-header/PanelHeader";
 import "./RightLayout.css";
 
 export interface RightLayoutProps {
@@ -18,7 +20,8 @@ export interface RightLayoutProps {
 export function RightLayout({ width }: RightLayoutProps) {
   return (
     <aside className="right-layout" style={{ width }}>
-      {/* Right panel content goes here */}
+      <PanelHeader />
+      <div className="right-layout__content">{/* Right panel content goes here */}</div>
     </aside>
   );
 }

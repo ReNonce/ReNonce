@@ -1,0 +1,73 @@
+/**
+ * @title Welcome screen styles
+ * @notice Centered brand block plus the borderless "Get started" list.
+ * @dev `flex: 1 1 auto` + `width: 100%` make it fill both hosts — a flex row
+ * (the ViewSwap layer) and a plain block (the terminal panel) — so the content
+ * lands in the middle of either.
+ */
+
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  overflow: auto;
+  text-align: center;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.welcome__brand-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.welcome__brand {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.welcome__description {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted-foreground);
+}
+
+.welcome__card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 360px;
+  text-align: left;
+}
+
+.welcome__heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 4px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.welcome__divider {
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--border);
+}

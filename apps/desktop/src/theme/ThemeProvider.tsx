@@ -17,7 +17,7 @@ import type { ReactNode } from "react";
 import { ThemeContext } from "./context";
 import type { ResolvedMode, ThemeContextValue, ThemeMode } from "./context";
 import { DEFAULT_THEME_ID, getTheme, resolveVariant, themeById } from "./registry";
-import { colorsToCssVars } from "./tokens";
+import { colorsToCssVars, terminalToCssVars } from "./tokens";
 
 const STORAGE_KEY = "renonce.theme";
 const DEFAULT_MODE: ThemeMode = "system";
@@ -108,7 +108,11 @@ export function ThemeProvider({
 
   useLayoutEffect(() => {
     const root = document.documentElement;
-    for (const [name, value] of Object.entries(colorsToCssVars(variant.colors))) {
+    const vars = {
+      ...colorsToCssVars(variant.colors),
+      ...terminalToCssVars(variant.terminal),
+    };
+    for (const [name, value] of Object.entries(vars)) {
       root.style.setProperty(name, value);
     }
     root.dataset.theme = theme.id;

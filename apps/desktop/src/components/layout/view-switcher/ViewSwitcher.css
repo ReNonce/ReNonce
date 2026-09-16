@@ -1,0 +1,58 @@
+/**
+ * @title View switcher styles
+ * @notice Full-width segmented control — merged segments in one pill, no gaps,
+ * hairline separators, and a lit active segment.
+ * @dev Fills its container, so the hosting panel header supplies the 5 px side
+ * padding. The icon slot is sized here; icons are `<MaskIcon />` and follow the
+ * segment's text color.
+ */
+
+.view-switcher {
+  display: flex;
+  width: 100%;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  overflow: hidden;
+}
+
+.view-switcher__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 0;
+  gap: 6px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.view-switcher__item + .view-switcher__item {
+  border-left: 1px solid var(--border);
+}
+
+.view-switcher__item:hover {
+  color: var(--foreground);
+}
+
+.view-switcher__item[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.view-switcher__item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.view-switcher__icon {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+}
