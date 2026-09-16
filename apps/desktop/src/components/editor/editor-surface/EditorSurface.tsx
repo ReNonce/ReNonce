@@ -83,17 +83,54 @@ const EDITOR_THEME = EditorView.theme({
 });
 
 /**
+ * Languages for files recognised by name rather than extension.
+ * @dev Dotfiles have no usable extension, and `Dockerfile`/`Containerfile` have
+ * none at all. Git-family ignores and editor configs share the `properties`
+ * tokenizer, which handles `#` comments plus key/value lines.
+ */
+const FILENAME_LANGUAGES: Record<string, () => Extension> = {
+  dockerfile: () => StreamLanguage.define(dockerFile),
+  containerfile: () => StreamLanguage.define(dockerFile),
+  ".gitignore": () => StreamLanguage.define(properties),
+  ".gitattributes": () => StreamLanguage.define(properties),
+  ".gitmodules": () => StreamLanguage.define(properties),
+  ".gitconfig": () => StreamLanguage.define(properties),
+  ".dockerignore": () => StreamLanguage.define(properties),
+  ".npmignore": () => StreamLanguage.define(properties),
+  ".editorconfig": () => StreamLanguage.define(properties),
+};
+
+/** Shell startup files that carry no extension at all. */
+const SHELL_FILENAMES = new Set([
+  ".profile",
+  ".bash_profile",
+  ".bash_login",
+  ".zprofile",
+  ".zlogin",
+]);
+
+/**
  * Language support picked from the file name.
- * @dev Unknown extensions get no language (plain text). Filenames without an
- * extension are matched first, so `Dockerfile` still highlights. Lock files are
- * TOML in practice (Cargo.lock, poetry.lock) — `package-lock.json` is JSON by its
- * own extension — and `properties` doubles for ini-style config files.
+ * @dev Unknown names get no language (plain text). Order matters: exact names
+ * first (Dockerfile, .gitignore), then prefixes (`rc` shell files, `.env` and
+ * its variants like `.env.local`), then the extension switch. Lock files are
+ * TOML in practice (Cargo.lock, poetry.lock) — `package-lock.json` is JSON
+ * through its own extension.
  */
 function languageFor(path: string): Extension {
   const filename = path.split(/[\\/]/).pop()?.toLowerCase() ?? "";
-  if (filename === "dockerfile") {
-    return StreamLanguage.define(dockerFile);
+
+  const byName = FILENAME_LANGUAGES[filename];
+  if (byName !== undefined) {
+    return byName();
   }
+  if (SHELL_FILENAMES.has(filename) || filename.endsWith("rc")) {
+    return StreamLanguage.define(shell);
+  }
+  if (filename === ".env" || filename.startsWith(".env.")) {
+    return StreamLanguage.define(properties);
+  }
+
   const extension = filename.includes(".") ? (filename.split(".").pop() ?? "") : "";
   switch (extension) {
     case "js":
@@ -149,6 +186,8 @@ function languageFor(path: string): Extension {
     case "conf":
     case "env":
     case "properties":
+    case "desktop":
+    case "service":
       return StreamLanguage.define(properties);
     case "diff":
     case "patch":
