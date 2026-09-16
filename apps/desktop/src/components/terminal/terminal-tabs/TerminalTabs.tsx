@@ -15,6 +15,7 @@ import { useKeymap } from "../../../keymap/keymap";
 import { listShells } from "../../../terminal/shells";
 import type { ShellInfo } from "../../../terminal/shells";
 import { CommandRow } from "../../command/command-row/CommandRow";
+import { ContextMenu } from "../../ui/context-menu/ContextMenu";
 import "./TerminalTabs.css";
 
 export interface TerminalTab {
@@ -35,6 +36,10 @@ export interface TerminalTabsProps {
   onClose: (id: string) => void;
   /** Opens a terminal; a null shell means the platform default. */
   onOpen: (shell: string | null) => void;
+  /** Closes every tab except the given one. */
+  onCloseOthers: (id: string) => void;
+  /** Closes every tab. */
+  onCloseAll: () => void;
 }
 
 /**
@@ -46,9 +51,18 @@ export interface TerminalTabsProps {
  * @param props.onOpen Called with the chosen shell (null for the default).
  * @return The tab strip element.
  */
-export function TerminalTabs({ tabs, activeId, onSelect, onClose, onOpen }: TerminalTabsProps) {
+export function TerminalTabs({
+  tabs,
+  activeId,
+  onSelect,
+  onClose,
+  onOpen,
+  onCloseOthers,
+  onCloseAll,
+}: TerminalTabsProps) {
   const bindings = useKeymap();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [tabMenu, setTabMenu] = useState<{ x: number; y: number; id: string } | null>(null);
   const [position, setPosition] = useState({ top: 0, right: 0 });
   const [shells, setShells] = useState<ShellInfo[]>([]);
   const addRef = useRef<HTMLButtonElement>(null);
@@ -119,6 +133,10 @@ export function TerminalTabs({ tabs, activeId, onSelect, onClose, onOpen }: Term
             className="terminal-tabs__item"
             role="presentation"
             data-active={active}
+            onContextMenu={(event) => {
+              event.preventDefault();
+              setTabMenu({ x: event.clientX, y: event.clientY, id: tab.id });
+            }}
           >
             <button
               type="button"
@@ -178,6 +196,31 @@ export function TerminalTabs({ tabs, activeId, onSelect, onClose, onOpen }: Term
             />
           ))}
         </div>
+      )}
+      {tabMenu !== null && (
+        <ContextMenu
+          x={tabMenu.x}
+          y={tabMenu.y}
+          onClose={() => setTabMenu(null)}
+          items={[
+            {
+              id: "close",
+              label: "Close",
+              onSelect: () => onClose(tabMenu.id),
+            },
+            {
+              id: "close-others",
+              label: "Close Others",
+              disabled: tabs.length < 2,
+              onSelect: () => onCloseOthers(tabMenu.id),
+            },
+            {
+              id: "close-all",
+              label: "Close All",
+              onSelect: onCloseAll,
+            },
+          ]}
+        />
       )}
     </div>
   );

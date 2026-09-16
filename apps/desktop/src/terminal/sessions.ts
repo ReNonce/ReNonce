@@ -175,6 +175,32 @@ export function openFileTab(path: string): string {
   return session.id;
 }
 
+/**
+ * @notice Closes every tab except the given one, which becomes active.
+ * @param id Session to keep; unknown ids are ignored.
+ */
+export function closeOtherTerminals(id: string): void {
+  const keep = sessions.find((session) => session.id === id);
+  if (keep === undefined) {
+    return;
+  }
+  sessions = [keep];
+  activeId = keep.id;
+  notify();
+}
+
+/**
+ * @notice Closes every tab.
+ */
+export function closeAllTerminals(): void {
+  if (sessions.length === 0) {
+    return;
+  }
+  sessions = [];
+  activeId = "";
+  notify();
+}
+
 // Opening a folder starts a terminal in it, unless tabs are already open.
 let lastRoot = getWorkspaceRoot();
 subscribeWorkspace(() => {

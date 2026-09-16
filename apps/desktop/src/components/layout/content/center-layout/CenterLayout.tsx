@@ -7,6 +7,8 @@
  * @return The center panel element.
  */
 import {
+  closeAllTerminals,
+  closeOtherTerminals,
   closeTerminal,
   openTerminal,
   setActiveTerminal,
@@ -34,6 +36,8 @@ export function CenterLayout() {
           onSelect={setActiveTerminal}
           onClose={closeTerminal}
           onOpen={(shell) => openTerminal(root, shell)}
+          onCloseOthers={closeOtherTerminals}
+          onCloseAll={closeAllTerminals}
         />
         <CommandMenu />
       </PanelHeader>
