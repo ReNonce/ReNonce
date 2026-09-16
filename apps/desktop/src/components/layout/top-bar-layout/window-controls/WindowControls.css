@@ -1,0 +1,37 @@
+/**
+ * @title Window controls styles
+ * @notice Minimize / maximize / close buttons for the borderless window.
+ * @dev Buttons stretch the full bar height and sit flush against the
+ * top-right corner; the close button turns destructive red on hover.
+ */
+
+.window-controls {
+  display: flex;
+  align-self: stretch;
+  margin-left: 4px;
+}
+
+.window-controls__button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.window-controls__button:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.window-controls__button:disabled {
+  color: var(--muted-foreground);
+  cursor: not-allowed;
+}
+
+.window-controls__button--close:hover:not(:disabled) {
+  background: var(--destructive);
+  color: #ffffff;
+}

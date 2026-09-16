@@ -30,7 +30,7 @@ renonce/
 │   │   │   ├── main.tsx    # bootstrap (StrictMode + ThemeProvider + App)
 │   │   │   ├── App.tsx     # root component (renders AppLayout, stays thin)
 │   │   │   ├── App.css     # base styles (font tokens + body reset)
-│   │   │   ├── components/ # components by domain (brand/logo/, layout/)
+│   │   │   ├── components/ # components by domain (animation/, brand/logo/, layout/, settings/)
 │   │   │   ├── styles/     # global CSS (fonts.css @font-face)
 │   │   │   ├── theme/      # theme registry/provider/hook + themes/ palettes
 │   │   │   └── assets/     # renonce-icon.svg / renonce-lockup.svg shortcuts
@@ -130,11 +130,17 @@ silently keeping them; never delete `DO NOT REMOVE` warnings.
 
 ## 7. Window / custom titlebar
 
-- Window is **borderless** (`decorations: false`). No OS title bar, no drag
-  until a custom titlebar with a Tauri drag region is built.
-- Custom titlebar requirements: drag region, manual
-  minimize/maximize/close via `@tauri-apps/api` + window permissions in
-  `capabilities/default.json`, per-OS padding (macOS traffic lights sit left).
+- Window is **borderless** (`decorations: false`); the top bar is the custom
+  titlebar: brand + sidebar toggles, a `data-tauri-drag-region` drag area, and
+  the window controls (minimize / maximize-restore / close) — all in
+  `apps/desktop/src/components/layout/top-bar-layout/`.
+- Window-control calls need the window permissions listed in
+  `apps/desktop/src-tauri/capabilities/default.json`
+  (`core:window:allow-{minimize,toggle-maximize,close,is-maximized}` plus
+  `allow-start-dragging` for the drag region). Changing that file needs an app
+  rebuild/restart, not just a hot reload.
+- Open: per-OS control placement (macOS traffic lights sit left; Windows and
+  Linux expect controls right) — they are currently fixed on the right.
 - Cross-platform costs: Windows snap layout is lost with custom buttons;
   Linux behavior varies by DE (GNOME/KDE) and Wayland/X11; macOS prefers
   `titleBarStyle: overlay`. Test on every target OS.

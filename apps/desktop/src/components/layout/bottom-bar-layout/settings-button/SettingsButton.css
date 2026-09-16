@@ -1,0 +1,32 @@
+/**
+ * @title Settings button styles
+ * @notice Gear button pinned to the right end of the bottom bar.
+ * @dev Sized to the bar height so it reads as part of the status bar.
+ */
+
+.settings-button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.settings-button:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.settings-button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.settings-button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}

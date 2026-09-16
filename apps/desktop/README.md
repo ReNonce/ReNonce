@@ -36,7 +36,7 @@ desktop/
 │   ├── main.tsx        # bootstrap (StrictMode + ThemeProvider + App)
 │   ├── App.tsx         # root component (renders AppLayout)
 │   ├── App.css         # base styles (font tokens + body reset)
-│   ├── components/     # components by domain (brand/logo/, layout/)
+│   ├── components/     # components by domain (animation/, brand/logo/, layout/, settings/)
 │   ├── styles/         # global CSS (fonts.css @font-face rules)
 │   ├── theme/          # theme registry/provider/hook + themes/ palettes
 │   └── assets/         # renonce-icon.svg / renonce-lockup.svg (imported)
@@ -50,14 +50,19 @@ desktop/
 
 ## Notes
 
-- Window is borderless: no OS title bar and no drag until a custom titlebar
-  with a Tauri drag region is built.
+- Window is borderless; the top bar doubles as the custom titlebar (Tauri
+  drag region + minimize/maximize/close via `@tauri-apps/api`). Window
+  permissions live in `src-tauri/capabilities/default.json` — changing that
+  file needs an app restart, not just a hot reload.
 - Brand artwork is white: opaque `Icon` works anywhere, transparent variants
   are dark-background only. Use `<Logo variant="..." />`
   (`src/components/brand/logo/`) and details in
   `public/assets/brand/README.md`.
-- App shell: `src/components/layout/` — top bar, three-column content
-  (left / center / right, drag the resizers to resize), and bottom bar.
+- App shell: `src/components/layout/` — top bar (brand, sidebar toggles,
+  window controls), three-column content (drag the resizers to resize), and
+  bottom bar whose gear switches the content row to the settings view
+  (`src/components/settings/`): a menu column on the sidebar surface plus
+  section content — the first section is Theme (palette + light/dark/system).
   Feature views go inside the panel components.
 - Theme: `<ThemeProvider>` (`src/theme/`) applies the active palette as CSS
   variables and persists the choice (`renonce.theme` in localStorage); read it

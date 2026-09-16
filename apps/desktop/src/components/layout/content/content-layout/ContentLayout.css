@@ -17,6 +17,10 @@
   user-select: none;
 }
 
+.content-layout--resizing .content-layout__sidebar {
+  transition: none;
+}
+
 .content-layout__resizer {
   position: relative;
   flex: 0 0 4px;

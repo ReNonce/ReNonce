@@ -1,0 +1,148 @@
+/**
+ * @title Theme settings styles
+ * @notice Section content: mode switch plus a grid of theme cards with a
+ * palette preview swatch.
+ * @dev Cards keep one size — fixed min-height and a single-line, ellipsised
+ * description. Every card's swatch shows that theme's own colors (inline styles
+ * from ThemeSettings.tsx); the surrounding chrome uses the active theme tokens.
+ */
+
+.theme-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 880px;
+}
+
+.theme-settings__group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.theme-settings__title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.theme-settings__modes {
+  display: inline-flex;
+  align-self: flex-start;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  overflow: hidden;
+}
+
+.theme-settings__mode {
+  padding: 6px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  cursor: pointer;
+}
+
+.theme-settings__mode:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.theme-settings__mode[aria-pressed="true"] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.theme-settings__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.theme-settings__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 72px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.theme-settings__item:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.theme-settings__item[aria-pressed="true"] {
+  border-color: var(--ring);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.theme-settings__item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.theme-settings__swatch {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  width: 56px;
+  height: 40px;
+  border: 1px solid;
+  border-radius: calc(var(--radius) - 4px);
+}
+
+.theme-settings__swatch-primary {
+  position: absolute;
+  top: 7px;
+  left: 8px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.theme-settings__swatch-foreground {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  width: 26px;
+  height: 4px;
+  border-radius: 2px;
+  opacity: 0.75;
+}
+
+.theme-settings__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.theme-settings__name {
+  font-weight: 600;
+}
+
+.theme-settings__description {
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

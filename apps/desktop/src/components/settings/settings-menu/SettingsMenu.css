@@ -1,0 +1,76 @@
+/**
+ * @title Settings menu styles
+ * @notice Group headings plus clickable section cards, using the sidebar
+ * tokens so the column reads as the same surface as the app sidebar.
+ * @dev Separated from the content by a single right border (no resizer here).
+ * `box-sizing: border-box` keeps the declared width honest with its padding.
+ */
+
+.settings-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 240px;
+  padding: 10px;
+  overflow: auto;
+  border-right: 1px solid var(--border);
+  background: var(--sidebar);
+  color: var(--sidebar-foreground);
+}
+
+.settings-menu__group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-menu__heading {
+  margin: 0;
+  padding: 0 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.settings-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--sidebar-border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-menu__item:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+.settings-menu__item[aria-current="true"] {
+  border-color: var(--sidebar-border);
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+  font-weight: 600;
+}
+
+.settings-menu__item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.settings-menu__icon {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+}

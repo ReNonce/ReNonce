@@ -1,14 +1,36 @@
 /**
  * @title Top bar layout styles
- * @notice Chrome above the content area; VS Code-style single bottom border.
- * @dev No top border or shadow — the top bar touches the window edge.
+ * @notice Chrome above the content area: brand + sidebar toggles on the left,
+ * window controls on the right; VS Code-style single bottom border.
+ * @dev No top border — the bar touches the window edge. Window controls sit
+ * flush against the top-right corner (per-OS placement is still open, see
+ * AGENT.md §7).
  */
 
 .top-bar-layout {
   display: flex;
   align-items: center;
+  gap: 2px;
   flex: 0 0 auto;
   height: 36px;
+  padding-left: 8px;
   border-bottom: 1px solid var(--border);
   background: var(--background);
+  user-select: none;
+}
+
+.top-bar-layout__group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.top-bar-layout__logo {
+  display: block;
+  margin-right: 4px;
+}
+
+.top-bar-layout__spacer {
+  flex: 1 1 auto;
+  align-self: stretch;
 }

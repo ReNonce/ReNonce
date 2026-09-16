@@ -1,0 +1,27 @@
+/**
+ * @title Sidebar toggle styles
+ * @notice Compact icon button used in the top bar to show/hide a sidebar.
+ * @dev Radius derives from the theme token so it stays consistent per theme.
+ */
+
+.sidebar-toggle {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.sidebar-toggle:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.sidebar-toggle:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}

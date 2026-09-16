@@ -1,0 +1,32 @@
+/**
+ * @title Collapse styles
+ * @notice Animates width (horizontal) or height (vertical) with a smooth ease.
+ * @dev Timing falls back to the shared motion tokens (App.css); per-instance
+ * overrides go through the `duration` prop, per-stylesheet through
+ * `--collapse-easing`. Transitions are disabled for users who prefer reduced
+ * motion. Children keep their own sizes and are clipped by `overflow: hidden`.
+ */
+
+.collapse {
+  display: flex;
+  overflow: hidden;
+  flex: 0 0 auto;
+  transition-duration: var(--motion-duration, 220ms);
+  transition-timing-function: var(--collapse-easing, var(--motion-easing, cubic-bezier(0.4, 0, 0.2, 1)));
+}
+
+.collapse--horizontal {
+  flex-direction: row;
+  transition-property: width;
+}
+
+.collapse--vertical {
+  flex-direction: column;
+  transition-property: height;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapse {
+    transition: none;
+  }
+}

@@ -1,0 +1,46 @@
+/**
+ * @title ViewSwap styles
+ * @notice Stacked full-size layers sharing one grid cell; whichever layer
+ * becomes active widens out of the center while the layer it replaces stays put
+ * until it is covered.
+ * @dev Symmetric in both directions — opening and closing look the same.
+ * Leaving layers keep their size for one duration and then snap away with a
+ * 0 ms delayed transition, so a swap never shows a second motion; entering
+ * layers transition from their own (already clipped) computed style, so no
+ * un-clipped frame can flash. The reveal is a `clip-path` inset (never a size
+ * change), so content keeps its layout while it appears. Timing comes from the
+ * shared motion tokens (App.css); all transitions are disabled for users who
+ * prefer reduced motion.
+ */
+
+.view-swap {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.view-swap__layer {
+  display: flex;
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: 0;
+  z-index: 0;
+  clip-path: inset(0 50% 0 50%);
+  transition: clip-path 0ms linear var(--motion-duration, 220ms);
+}
+
+.view-swap__layer[data-active="true"] {
+  z-index: 1;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path var(--motion-duration, 220ms) var(--motion-easing, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view-swap__layer,
+  .view-swap__layer[data-active="true"] {
+    transition: none;
+  }
+}
