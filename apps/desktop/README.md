@@ -33,12 +33,15 @@ desktop/
 ├── index.html          # blank shell, React mounts into #root
 ├── vite.config.ts      # React plugin + Tauri dev server (port 1420)
 ├── src/
-│   ├── main.tsx        # bootstrap (StrictMode + App)
-│   ├── App.tsx         # blank root component
-│   ├── App.css         # minimal base styles
+│   ├── main.tsx        # bootstrap (StrictMode + ThemeProvider + App)
+│   ├── App.tsx         # root component (renders AppLayout)
+│   ├── App.css         # base styles (font tokens + body reset)
+│   ├── components/     # components by domain (brand/logo/, layout/)
+│   ├── styles/         # global CSS (fonts.css @font-face rules)
+│   ├── theme/          # theme registry/provider/hook + themes/ palettes
 │   └── assets/         # renonce-icon.svg / renonce-lockup.svg (imported)
 ├── public/
-│   └── assets/          # brand/ + themes/icons/fonts/sounds, see its README
+│   └── assets/          # brand/ + icons/fonts/sounds, see its README
 └── src-tauri/
     ├── tauri.conf.json # borderless window (decorations: false)
     ├── capabilities/   # no shell scopes yet
@@ -50,6 +53,17 @@ desktop/
 - Window is borderless: no OS title bar and no drag until a custom titlebar
   with a Tauri drag region is built.
 - Brand artwork is white: opaque `Icon` works anywhere, transparent variants
-  are dark-background only. Details in `public/assets/brand/README.md`.
+  are dark-background only. Use `<Logo variant="..." />`
+  (`src/components/brand/logo/`) and details in
+  `public/assets/brand/README.md`.
+- App shell: `src/components/layout/` — top bar, three-column content
+  (left / center / right, drag the resizers to resize), and bottom bar.
+  Feature views go inside the panel components.
+- Theme: `<ThemeProvider>` (`src/theme/`) applies the active palette as CSS
+  variables and persists the choice (`renonce.theme` in localStorage); read it
+  with `useTheme()`. Default is the `xcode` theme following the OS light/dark
+  setting.
+- Fonts are self-hosted via `src/styles/fonts.css`: IBM Plex Sans for UI text,
+  Lilex for monospaced content.
 - Repo-level docs: [`../../README.md`](../../README.md),
   [`../../AGENT.md`](../../AGENT.md).

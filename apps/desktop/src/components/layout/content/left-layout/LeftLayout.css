@@ -1,0 +1,13 @@
+/**
+ * @title Left layout styles
+ * @notice Side panel surface using the theme sidebar tokens.
+ * @dev No side borders — the neighboring resizer paints the separator.
+ */
+
+.left-layout {
+  flex: 0 0 auto;
+  min-width: 0;
+  overflow: auto;
+  background: var(--sidebar);
+  color: var(--sidebar-foreground);
+}

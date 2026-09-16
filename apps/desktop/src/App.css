@@ -1,16 +1,31 @@
 /**
  * @title ReNonce base styles
- * @notice Minimal foundation (font + body reset). Component styles go below.
- * @dev Keep this file free of template leftovers; add new sections under headers.
+ * @notice Global foundation: font tokens, document reset, full-height root.
+ * @dev Theme colors arrive as CSS variables from ThemeProvider (src/theme/);
+ * the fallbacks below mirror the default theme (xcode light) for the first
+ * paint, before the provider has applied tokens. Component styles live next
+ * to their component as `Name.tsx` + `Name.css` (classes prefixed with the
+ * component name) — keep component rules out of this file.
  */
 
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Lilex", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-sans);
   font-size: 16px;
   line-height: 24px;
   font-weight: 400;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
+  overflow: hidden;
+  background: var(--background, #ffffff);
+  color: var(--foreground, #1d1d1f);
 }

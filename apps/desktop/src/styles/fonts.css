@@ -1,0 +1,73 @@
+/**
+ * @title ReNonce fonts
+ * @notice Self-hosted @font-face rules: IBM Plex Sans for UI text, Lilex for
+ * code and monospaced content.
+ * @dev Files live in `public/assets/fonts/` and are served at
+ * `/assets/fonts/...`. Both families are OFL-licensed — keep their license
+ * files in place, never inline or re-license the fonts. Lilex ships 400/700,
+ * IBM Plex Sans 400/600; map any other weights in CSS.
+ */
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/ibm-plex-sans/IBMPlexSans-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/ibm-plex-sans/IBMPlexSans-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/assets/fonts/ibm-plex-sans/IBMPlexSans-SemiBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/assets/fonts/ibm-plex-sans/IBMPlexSans-SemiBoldItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Lilex";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/lilex/Lilex-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Lilex";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/lilex/Lilex-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Lilex";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/assets/fonts/lilex/Lilex-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Lilex";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/assets/fonts/lilex/Lilex-BoldItalic.ttf") format("truetype");
+}

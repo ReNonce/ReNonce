@@ -93,6 +93,15 @@ By URL (served from `public/`):
 <img src="/assets/brand/ReNonce-Type/ReNonce-Type.svg" alt="ReNonce" />
 ```
 
+Preferred in-app accessor: the `Logo` component
+(`src/components/brand/logo/Logo.tsx`) — it maps all four variants to their SVG paths,
+scales by `size`, and warns (dev only) when white transparent artwork would
+sit on a light background:
+
+```tsx
+<Logo variant="lockup" size={32} />
+```
+
 By import in React components (shortcuts in `src/assets/`, duplicates of 2 SVGs
 above kept so imports stay short):
 
@@ -117,3 +126,13 @@ if the logo ever changes:
 - Do not use transparent variants on light backgrounds.
 - Do not use JPG for UI.
 - Need a size missing from the table? Scale down from SVG, never upscale a small PNG.
+
+## License
+
+Copyright 2026 ReNonce.
+
+All artwork in this directory — including the `renonce-icon.svg` /
+`renonce-lockup.svg` import shortcuts in `src/assets/` (exact copies of two
+SVGs above) — is licensed under the Apache License, Version 2.0, same as the
+rest of this repository. See [`LICENSE`](./LICENSE) in this directory
+(identical to the root `LICENSE`) for the full text.

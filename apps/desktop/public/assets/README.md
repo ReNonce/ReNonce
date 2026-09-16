@@ -4,7 +4,6 @@ Static files served by the ReNonce desktop app. Vite serves `public/` in dev
 and copies it into `dist/` on build, so everything here is URL-ready:
 
 - Brand: `/assets/brand/...` (see `brand/README.md`)
-- Themes: `/assets/themes/...`
 - Icons: `/assets/icons/...`
 - Fonts: `/assets/fonts/...`
 - Sounds: `/assets/sounds/...`
@@ -21,7 +20,7 @@ import settingsIcon from "/assets/icons/settings.svg";
 ## Icon theming (3 groups)
 
 The `icons/` SVGs are not uniformly theme-safe (only 2 files use
-`currentColor`). The future theme loader must treat each group differently:
+`currentColor`). The future icon loader must treat each group differently:
 
 | Group | Files | Pattern | Rule |
 |---|---|---|---|
@@ -33,24 +32,18 @@ Upstream gets away with hardcoded colors because its renderer tints icons
 at draw time; plain web `<img>` cannot do that. Optional cleanup: a one-time
 build step normalizing group A to `currentColor`.
 
-Fonts need an `@font-face` rule pointing at
-`/assets/fonts/.../*.ttf`. Theme files are TypeScript `Theme` modules
-(shadcn-style `background`/`foreground`/`primary`/… tokens with `light`/`dark`
-variants) — reference until the theme loader lands, not imported yet.
+Fonts are loaded by `src/styles/fonts.css` (`@font-face` rules pointing at
+`/assets/fonts/.../*.ttf`). Themes are **not** served from here anymore: the
+theme palettes live as compiled modules in `src/theme/themes/` (see that
+directory's README) and feed the registry in `src/theme/registry.ts`.
 
 ## Contents and licenses
 
 `brand/` is original ReNonce artwork. `icons/`, `fonts/`, and `sounds/`
 are collected from an upstream open-source editor's `assets/` snapshot
-(pinned commit `7960b2a`, 2026-09-12). `themes/` holds 15 theme modules
-collected pure (byte-identical, colors untouched) from an upstream
-open-source Tauri + React project's theme set
-(pinned commit `b02a7dc`, 2026-09-13): `xcode`,
-`claude`, `kanagawa`, `kanagawa-dragon`, `tokyo-night`, `catppuccin`,
-`rose-pine`, `everforest`, `nord`, `gruvbox`, `dracula`, `solarized`,
-`tide`, `sage`, `caffeine` (the upstream `terax-default` entry was dropped —
-its variants are empty, colors live in upstream CSS we did not vendor).
-No upstream app code is included.
+(pinned commit `7960b2a`, 2026-09-12). The theme palettes were collected from
+a separate upstream (see `src/theme/themes/README.md`) and now live under
+`src/`. No upstream app code is included.
 
 Each collected directory keeps its upstream `LICENSE`/`LICENSES`/`OFL.txt`
 files — **do not delete them**, they are the attribution required by the
@@ -58,7 +51,6 @@ licenses.
 
 | Directory | Contents | License |
 |---|---|---|
-| `themes/` | 15 `.ts` theme modules (see list above) | Apache-2.0 (upstream repo license — compatible with this repo). Files are byte-identical copies; do not edit colors. They import a `Theme` type from a sibling module not vendored here, so treat them as data, not compilable sources. |
 | `icons/` | ~300 UI/file-type `.svg` icons | ISC for Lucide portions (see `icons/LICENSES`). Upstream-original icons without a separate license file fall under the upstream GPL-3.0-or-later. Upstream-prefixed filenames were renamed to neutral names. |
 | `fonts/` | Lilex + IBM Plex Sans (`.ttf`) | OFL (see `fonts/lilex/OFL.txt`, `fonts/ibm-plex-sans/license.txt`). |
 | `sounds/` | 8 call/agent `.wav` effects | Upstream GPL-3.0-or-later (no separate license file). |
@@ -79,10 +71,10 @@ git -C /tmp/collect-src sparse-checkout set \
 cp -r /tmp/collect-src/assets/{icons,fonts,sounds} \
   apps/desktop/public/assets/
 
-# themes (separate upstream, TypeScript modules)
+# themes (separate upstream, TypeScript modules) — they now target src/
 git -C /tmp/collect-src2 show \
   <pinned-commit>:src/modules/theme/themes/<name>.ts \
-  > apps/desktop/public/assets/themes/<name>.ts
+  > apps/desktop/src/theme/themes/<name>.ts
 ```
 
 Then re-apply the scrubbing on icons (rename upstream-prefixed files),
@@ -95,6 +87,8 @@ upstream may add files under different terms.
 - Do not remove or edit upstream `LICENSE`/`LICENSES`/`OFL.txt` files.
 - Do not copy GPL-licensed files into `src/` as inlined/compiled-in code
   without checking implications first; prefer loading them as runtime files.
+- Do not edit theme palettes; they are byte-identical upstream copies
+  under `src/theme/themes/`.
 - Prefer ReNonce brand assets (`brand/`) for product UI;
   collected assets are reference/fallback material.
 - Do not use transparent artwork on light backgrounds

@@ -27,11 +27,14 @@ renonce/
 │   │   ├── index.html      # blank shell, React mounts into #root
 │   │   ├── vite.config.ts  # React plugin + Tauri dev server (port 1420)
 │   │   ├── src/
-│   │   │   ├── main.tsx    # bootstrap (StrictMode + App)
-│   │   │   ├── App.tsx     # blank root component (NatSpec JSDoc)
-│   │   │   ├── App.css     # minimal base styles (header comment)
+│   │   │   ├── main.tsx    # bootstrap (StrictMode + ThemeProvider + App)
+│   │   │   ├── App.tsx     # root component (renders AppLayout, stays thin)
+│   │   │   ├── App.css     # base styles (font tokens + body reset)
+│   │   │   ├── components/ # components by domain (brand/logo/, layout/)
+│   │   │   ├── styles/     # global CSS (fonts.css @font-face)
+│   │   │   ├── theme/      # theme registry/provider/hook + themes/ palettes
 │   │   │   └── assets/     # renonce-icon.svg / renonce-lockup.svg shortcuts
-│   │   ├── public/assets/  # brand/ + themes/icons/fonts/sounds + its own README.md
+│   │   ├── public/assets/  # brand/ + icons/fonts/sounds + its own README.md
 │   │   └── src-tauri/
 │   │       ├── tauri.conf.json   # borderless window (JSON: no comments allowed)
 │   │       ├── Cargo.toml
@@ -116,6 +119,9 @@ silently keeping them; never delete `DO NOT REMOVE` warnings.
   Variants, measured pixel sizes, format rules: brand `README.md`.
 - Component imports: `apps/desktop/src/assets/renonce-icon.svg`,
   `apps/desktop/src/assets/renonce-lockup.svg`.
+- In-app accessor: `apps/desktop/src/components/brand/logo/Logo.tsx` —
+  `<Logo variant="icon | icon-only | lockup | wordmark" />` picks the right
+  file and warns in dev when transparent artwork would sit on a light background.
 - Artwork is **white**: opaque `ReNonce-Icon-*` works anywhere;
   transparent `Icon-only` / `icon-type` / `Type` are **dark-background only**.
 - OS icons: regenerate from the 1024 master via `tauri icon`,
@@ -137,7 +143,12 @@ silently keeping them; never delete `DO NOT REMOVE` warnings.
 
 - Don't add UI/features beyond what was asked; keep the scaffold clean.
 - Don't reintroduce template leftovers (Tauri greet demo, default logos/copy).
-- New views go in dedicated components under `apps/desktop/src/`; keep `App.tsx` thin.
+- New views go in dedicated components under `apps/desktop/src/components/`,
+  one domain/name folder each (e.g. `components/brand/logo/Logo.tsx`);
+  feature views render inside the layout panels (`components/layout/`),
+  keep `App.tsx` thin.
+- Component styles pair with their component (`Name.tsx` + `Name.css` in the
+  same folder); class names are kebab-case and prefixed with the component name.
 - JSON files take no comments — document their quirks in NatSpec `@dev`
   notes of the code that consumes them.
 - After editing Rust run `cargo fmt --check`; after TS run `npx tsc --noEmit`.
