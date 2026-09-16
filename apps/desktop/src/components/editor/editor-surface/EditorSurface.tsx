@@ -8,15 +8,25 @@
  * comments italic bright-black, types cyan, functions and properties blue.
  */
 import { useEffect, useRef } from "react";
-import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import { HighlightStyle, StreamLanguage, syntaxHighlighting } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
+import { css } from "@codemirror/lang-css";
+import { html } from "@codemirror/lang-html";
 import { javascript } from "@codemirror/lang-javascript";
 import { json } from "@codemirror/lang-json";
 import { markdown } from "@codemirror/lang-markdown";
 import { python } from "@codemirror/lang-python";
 import { rust } from "@codemirror/lang-rust";
+import { sql } from "@codemirror/lang-sql";
+import { xml } from "@codemirror/lang-xml";
+import { yaml } from "@codemirror/lang-yaml";
+import { dockerFile } from "@codemirror/legacy-modes/mode/dockerfile";
+import { properties } from "@codemirror/legacy-modes/mode/properties";
+import { shell } from "@codemirror/legacy-modes/mode/shell";
+import { toml } from "@codemirror/legacy-modes/mode/toml";
 import { tags as t } from "@lezer/highlight";
+import { solidity } from "@replit/codemirror-lang-solidity";
 import { basicSetup } from "codemirror";
 import type { Extension } from "@codemirror/state";
 import "./EditorSurface.css";
@@ -71,9 +81,18 @@ const EDITOR_THEME = EditorView.theme({
   },
 });
 
-/** Language support picked from the file extension. */
+/**
+ * Language support picked from the file name.
+ * @dev Unknown extensions get no language (plain text). Filenames without an
+ * extension are matched first, so `Dockerfile` still highlights; `properties`
+ * doubles for ini-style config files.
+ */
 function languageFor(path: string): Extension {
-  const extension = path.split(".").pop()?.toLowerCase() ?? "";
+  const filename = path.split(/[\\/]/).pop()?.toLowerCase() ?? "";
+  if (filename === "dockerfile") {
+    return StreamLanguage.define(dockerFile);
+  }
+  const extension = filename.includes(".") ? (filename.split(".").pop() ?? "") : "";
   switch (extension) {
     case "js":
     case "jsx":
@@ -84,14 +103,47 @@ function languageFor(path: string): Extension {
     case "tsx":
       return javascript({ typescript: true, jsx: true });
     case "json":
+    case "jsonc":
       return json();
     case "md":
     case "markdown":
       return markdown();
     case "rs":
       return rust();
+    case "sol":
+      return solidity;
+    case "abi":
+      return json();
     case "py":
       return python();
+    case "html":
+    case "htm":
+    case "vue":
+    case "svelte":
+      return html();
+    case "css":
+    case "scss":
+    case "less":
+      return css();
+    case "yaml":
+    case "yml":
+      return yaml();
+    case "sql":
+      return sql();
+    case "xml":
+    case "svg":
+      return xml();
+    case "sh":
+    case "bash":
+    case "zsh":
+      return StreamLanguage.define(shell);
+    case "toml":
+      return StreamLanguage.define(toml);
+    case "ini":
+    case "cfg":
+    case "conf":
+    case "env":
+      return StreamLanguage.define(properties);
     default:
       return [];
   }
