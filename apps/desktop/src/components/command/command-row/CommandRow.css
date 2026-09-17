@@ -72,6 +72,16 @@
   color: inherit;
 }
 
+/* A stopped run keeps its row, but reads as inactive until it is picked up. */
+.command-row[data-dormant="true"] {
+  opacity: 0.55;
+}
+
+.command-row[data-dormant="true"]:hover,
+.command-row[data-dormant="true"][data-active="true"] {
+  opacity: 1;
+}
+
 .command-row__remove {
   display: grid;
   place-items: center;

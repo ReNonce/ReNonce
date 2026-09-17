@@ -137,7 +137,8 @@ export function AgentView() {
             icon={<MaskIcon src={session.iconSrc} />}
             label={session.label}
             hint={session.cwd === null ? undefined : folderName(session.cwd)}
-            active={session.terminalId === activeTabId}
+            active={session.terminalId !== "" && session.terminalId === activeTabId}
+            dormant={session.terminalId === ""}
             onSelect={() => focusAgentSession(session)}
             onRemove={() => closeAgentSession(session)}
             removeLabel={`Close ${session.label} session`}

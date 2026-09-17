@@ -17,6 +17,8 @@ export interface CommandRowProps {
   hint?: string;
   /** Highlights the row (palette keyboard selection). */
   active?: boolean;
+  /** Renders the row as stopped — readable, but clearly not the running one. */
+  dormant?: boolean;
   /** Called when the row is chosen. */
   onSelect: () => void;
   /** Adds a remove control when provided. */
@@ -41,12 +43,19 @@ export function CommandRow({
   label,
   hint,
   active = false,
+  dormant = false,
   onSelect,
   onRemove,
   removeLabel,
 }: CommandRowProps) {
   const row = (
-    <button type="button" className="command-row" data-active={active} onClick={onSelect}>
+    <button
+      type="button"
+      className="command-row"
+      data-active={active}
+      data-dormant={dormant}
+      onClick={onSelect}
+    >
       <span className="command-row__icon" aria-hidden="true">
         {icon}
       </span>
