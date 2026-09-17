@@ -36,6 +36,8 @@ export interface TerminalSession {
   commit: string | null;
   /** Terminal tabs only: command typed once the PTY is listening. */
   initialCommand: string | null;
+  /** Terminal tabs only: an agent CLI is the process, so its exit closes the tab. */
+  agent: boolean;
 }
 
 /** Which view an editor tab shows. */
@@ -69,6 +71,7 @@ function createSession(
   cwd: string | null,
   shell: string | null,
   initialCommand: string | null,
+  agent = false,
 ): TerminalSession {
   counter += 1;
   const session: TerminalSession = {
@@ -81,6 +84,7 @@ function createSession(
     mode: "code",
     commit: null,
     initialCommand,
+    agent,
   };
   return { ...session, label: defaultLabel(session) };
 }
@@ -143,8 +147,9 @@ export function openTerminal(
   cwd: string | null,
   shell: string | null = null,
   initialCommand: string | null = null,
+  agent = false,
 ): string {
-  const session = createSession(cwd, shell, initialCommand);
+  const session = createSession(cwd, shell, initialCommand, agent);
   sessions = [...sessions, session];
   activeId = session.id;
   notify();
@@ -258,6 +263,7 @@ export function openFileTab(path: string, mode: TabMode = "code"): string {
     mode,
     commit: null,
     initialCommand: null,
+    agent: false,
   };
   sessions = [...sessions, session];
   activeId = session.id;
@@ -291,6 +297,7 @@ export function openCommitDiffTab(root: string, commit: string): string {
     mode: "code",
     commit,
     initialCommand: null,
+    agent: false,
   };
   sessions = [...sessions, session];
   activeId = session.id;

@@ -165,11 +165,14 @@ export function TerminalSurface({ session, active }: TerminalSurfaceProps) {
         // tail is what lets the session row come back to that exact one.
         captureAgentOutput(id, new TextDecoder().decode(chunk));
       } else if (event.kind === "exit") {
-        term.write("\r\n\x1b[2m[process exited]\x1b[0m\r\n");
-        // An agent CLI that quit should not leave a dead terminal behind, and its
-        // session row stays in the agent panel to be resumed from there. Plain
-        // shell terminals are untouched.
-        notifyAgentExit(id);
+        // An agent CLI is the tab's own process, so its exit closes the tab and
+        // leaves the session row behind to be resumed. A plain shell keeps the
+        // banner it always had.
+        if (session.agent) {
+          notifyAgentExit(id);
+        } else {
+          term.write("\r\n\x1b[2m[process exited]\x1b[0m\r\n");
+        }
       } else if (event.kind === "error") {
         term.write(`\r\n\x1b[31m[renonce] ${event.message ?? "pty error"}\x1b[0m\r\n`);
       }

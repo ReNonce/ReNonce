@@ -77,7 +77,7 @@ export function openAgentSession(agent: AgentCli, cwd: string | null): AgentSess
   counter += 1;
   // `exec` makes the CLI the terminal's process rather than a job inside a shell,
   // so quitting it ends the PTY — which is what tells us the run has stopped.
-  const terminalId = openTerminal(cwd, null, `exec ${agent.command}`);
+  const terminalId = openTerminal(cwd, null, `exec ${agent.command}`, true);
   // The tab is named after the agent, so the strip reads "Codex CLI" rather
   // than the folder the session happens to run in.
   renameSession(terminalId, agent.label);
@@ -121,7 +121,7 @@ export function focusAgentSession(session: AgentSession): void {
       const args = resumeArgsFor(agent.key);
       return args === null ? agent.command : `${agent.command} ${args}`;
     })();
-  const terminalId = openTerminal(session.cwd, null, `exec ${resume}`);
+  const terminalId = openTerminal(session.cwd, null, `exec ${resume}`, true);
   renameSession(terminalId, agent.label);
   sessions = sessions.map((candidate) =>
     candidate.id === session.id ? { ...candidate, terminalId } : candidate,
@@ -194,18 +194,21 @@ function takeResumeCommand(terminalId: string, agentKey: string): string | null 
  */
 export function notifyAgentExit(terminalId: string): boolean {
   const session = sessions.find((candidate) => candidate.terminalId === terminalId);
+  const captured = session === undefined ? null : takeResumeCommand(terminalId, session.agentKey);
   if (session === undefined) {
-    return false;
+    outputTails.delete(terminalId);
+  } else {
+    sessions = sessions.map((candidate) =>
+      candidate.id === session.id
+        ? { ...candidate, terminalId: "", resumeCommand: captured ?? candidate.resumeCommand }
+        : candidate,
+    );
   }
-  const captured = takeResumeCommand(terminalId, session.agentKey);
-  sessions = sessions.map((candidate) =>
-    candidate.id === session.id
-      ? { ...candidate, terminalId: "", resumeCommand: captured ?? candidate.resumeCommand }
-      : candidate,
-  );
+  // Closing is unconditional: the caller only reports an exit for a tab it knows
+  // was launched as an agent, so the tab always goes even if no row claims it.
   closeTerminal(terminalId);
   notify();
-  return true;
+  return session !== undefined;
 }
 
 /**
