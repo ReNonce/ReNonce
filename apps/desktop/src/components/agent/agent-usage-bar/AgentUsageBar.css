@@ -87,11 +87,15 @@
   display: flex;
   align-items: center;
   gap: 3px;
+  max-width: 160px;
+  overflow: hidden;
   padding: 0 5px;
   border-radius: calc(var(--radius) - 6px);
   background: var(--ansi-2-soft);
   color: var(--ansi-2);
   font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .agent-usage__window[data-level="medium"] {

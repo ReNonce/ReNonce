@@ -38,6 +38,7 @@ export function AgentView() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerQuery, setPickerQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [focus, setFocus] = useState<{ agentKey: string; cwd: string | null } | null>(null);
 
   // A closed terminal takes its agent session with it.
   const live = sessions.filter((session) =>
@@ -132,7 +133,10 @@ export function AgentView() {
             label={session.label}
             hint={session.cwd === null ? undefined : folderName(session.cwd)}
             active={session.terminalId === activeTabId}
-            onSelect={() => focusAgentSession(session)}
+            onSelect={() => {
+              setFocus({ agentKey: session.agentKey, cwd: session.cwd });
+              focusAgentSession(session);
+            }}
             onRemove={() => closeAgentSession(session)}
             removeLabel={`Close ${session.label} session`}
           />
@@ -173,7 +177,7 @@ export function AgentView() {
         </PaletteShell>
       )}
 
-      <AgentUsageBar />
+      <AgentUsageBar focus={focus} />
     </div>
   );
 }

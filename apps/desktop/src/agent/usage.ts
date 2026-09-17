@@ -24,9 +24,11 @@ export interface UsageWindow {
 export interface AgentUsage {
   /** Agent key from the catalog, e.g. `codex`. */
   agentKey: string;
-  /** File the numbers were read from. */
+  /** File or folder the numbers were read from. */
   source: string;
   windows: UsageWindow[];
+  /** One-line summary for providers that report totals instead of windows. */
+  detail: string | null;
   /** Unix seconds of the reading. */
   readAt: number;
 }
@@ -36,30 +38,38 @@ export interface AgentUsage {
  * @dev Per agent on purpose: with a large catalog only a few providers publish
  * readable limits, so the panel asks for the one the user selected.
  * @param agentKey Agent key from the catalog, e.g. `codex`.
+ * @param cwd Folder of the picked session, used by per-session providers (Grok).
  * @return The provider's usage, or null when it cannot be read.
  */
-export async function readAgentUsage(agentKey: string): Promise<AgentUsage | null> {
+export async function readAgentUsage(
+  agentKey: string,
+  cwd: string | null = null,
+): Promise<AgentUsage | null> {
   if (!isTauri()) {
     return null;
   }
-  return invoke<AgentUsage | null>("agent_usage", { agentKey });
+  return invoke<AgentUsage | null>("agent_usage", { agentKey, cwd });
 }
 
 /**
- * @notice Why an agent's limits cannot be read right now.
- * @dev Each agent publishes usage somewhere different, and most keep it inside
- * their own interface: recorded per provider so the panel can say what would be
- * needed instead of leaving a bare "not readable". Wording stays short — it is
- * shown next to the agent.
+ * @notice Agents whose usage limits the panel can actually show.
+ * @dev Account-level limits only: Codex writes its 5-hour and weekly windows to
+ * disk, and Claude Code hands them to a statusline command the mirror taps.
+ * Grok publishes token and cost totals per session but no account limit, so it
+ * stays out of the list; providers that report nothing readable are out too.
+ */
+export const USAGE_AGENT_KEYS = ["claude", "codex"];
+
+/**
+ * @notice What an agent needs before its limits can be read.
+ * @dev Shown next to the agent instead of a bare "not readable", so the missing
+ * number is explained rather than mysterious.
  */
 const USAGE_NOTES: Record<string, string> = {
   codex: "Read from Codex's own rollout logs.",
   claude:
-    "Claude Code only exposes plan limits to a statusline hook, and none is writing them out yet.",
-  gemini: "Gemini CLI reports quota only inside its interactive interface.",
-  grok: "Grok needs a session id (grok usage <session>), so it has no account-wide number.",
-  opencode: "opencode reports tokens and cost (opencode stats), not plan windows.",
-  copilot: "Copilot CLI does not expose usage to other programs.",
+    "Needs the statusline mirror: Claude only hands plan limits to a statusline command (see scripts/claude-usage-mirror.sh).",
+  grok: "Grok reports tokens and cost per session, not an account limit.",
 };
 
 /**

@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { AGENT_CLIS } from "../../../agent/agents";
-import { readAgentUsage, untilReset, usageLevel, usageNote } from "../../../agent/usage";
+import { USAGE_AGENT_KEYS, readAgentUsage, untilReset, usageLevel, usageNote } from "../../../agent/usage";
 import type { AgentUsage } from "../../../agent/usage";
 import { MaskIcon } from "../../icons/mask-icon/MaskIcon";
 import { PaletteShell } from "../../palette/palette-shell/PaletteShell";
@@ -20,7 +20,18 @@ import "./AgentUsageBar.css";
 /** How often the open list re-reads usage. */
 const REFRESH_MS = 60_000;
 
-export function AgentUsageBar() {
+/** Agents worth listing: the ones with a readable source. */
+const USAGE_AGENTS = AGENT_CLIS.filter((agent) => USAGE_AGENT_KEYS.includes(agent.key));
+
+export interface AgentUsageBarProps {
+  /**
+   * Session the user picked, if any: its agent and folder decide which run the
+   * per-session providers (Grok) summarise.
+   */
+  focus?: { agentKey: string; cwd: string | null } | null;
+}
+
+export function AgentUsageBar({ focus = null }: AgentUsageBarProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -29,8 +40,8 @@ export function AgentUsageBar() {
 
   const load = useCallback(() => {
     void Promise.all(
-      AGENT_CLIS.map((agent) =>
-        readAgentUsage(agent.key)
+      USAGE_AGENTS.map((agent) =>
+        readAgentUsage(agent.key, focus?.cwd ?? null)
           .then((entry) => [agent.key, entry] as const)
           .catch(() => [agent.key, null] as const),
       ),
@@ -38,7 +49,7 @@ export function AgentUsageBar() {
       setUsage(Object.fromEntries(entries));
       setLoaded(true);
     });
-  }, []);
+  }, [focus?.cwd]);
 
   useEffect(() => {
     if (!open) {
@@ -55,8 +66,8 @@ export function AgentUsageBar() {
   const needle = query.trim().toLowerCase();
   const visible =
     needle === ""
-      ? AGENT_CLIS
-      : AGENT_CLIS.filter(
+      ? USAGE_AGENTS
+      : USAGE_AGENTS.filter(
           (agent) =>
             agent.label.toLowerCase().includes(needle) ||
             agent.key.includes(needle) ||
@@ -135,6 +146,15 @@ export function AgentUsageBar() {
                     </span>
                   ) : (
                     <span className="agent-usage__windows">
+                      {entry.detail !== null && (
+                        <span
+                          className="agent-usage__window"
+                          data-level="low"
+                          title={entry.detail}
+                        >
+                          {entry.detail}
+                        </span>
+                      )}
                       {entry.windows.map((window) => (
                         <span
                           key={window.label}
