@@ -59,6 +59,20 @@
   padding: 0 10px 4px;
 }
 
+/* Inline rename: takes the row's place while a name is typed. */
+.agent-view__rename {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--sidebar-ring);
+  border-radius: calc(var(--radius) - 4px);
+  background: var(--sidebar);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
 .agent-view__list {
   display: flex;
   flex-direction: column;

@@ -42,6 +42,19 @@ export function AgentView() {
   const [menu, setMenu] = useState<{ x: number; y: number; session: AgentSession } | null>(
     null,
   );
+  // Inline rename, the way a tab renames: the row turns into a field in place.
+  const [editing, setEditing] = useState<{ id: string; value: string } | null>(null);
+
+  const commitRename = () => {
+    if (editing === null) {
+      return;
+    }
+    const session = sessions.find((candidate) => candidate.id === editing.id);
+    setEditing(null);
+    if (session !== undefined) {
+      renameAgentSession(session, editing.value);
+    }
+  };
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerQuery, setPickerQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -147,15 +160,38 @@ export function AgentView() {
               event.preventDefault();
               setMenu({ x: event.clientX, y: event.clientY, session });
             }}
+            onDoubleClick={() => setEditing({ id: session.id, value: session.label })}
           >
-            <CommandRow
-              icon={<MaskIcon src={session.iconSrc} />}
-              label={session.label}
-              active={session.terminalId !== "" && session.terminalId === activeTabId}
-              onSelect={() => focusAgentSession(session)}
-              onRemove={() => closeAgentSession(session)}
-              removeLabel={`Close ${session.label} session`}
-            />
+            {editing?.id === session.id ? (
+              <input
+                autoFocus
+                className="agent-view__rename"
+                aria-label={`Rename ${session.label}`}
+                value={editing.value}
+                onFocus={(event) => event.currentTarget.select()}
+                onChange={(event) =>
+                  setEditing({ id: session.id, value: event.target.value })
+                }
+                onBlur={commitRename}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    commitRename();
+                  }
+                  if (event.key === "Escape") {
+                    setEditing(null);
+                  }
+                }}
+              />
+            ) : (
+              <CommandRow
+                icon={<MaskIcon src={session.iconSrc} />}
+                label={session.label}
+                active={session.terminalId !== "" && session.terminalId === activeTabId}
+                onSelect={() => focusAgentSession(session)}
+                onRemove={() => closeAgentSession(session)}
+                removeLabel={`Close ${session.label} session`}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -168,12 +204,8 @@ export function AgentView() {
             {
               id: "rename",
               label: "Rename",
-              onSelect: () => {
-                const next = window.prompt("Rename session", menu.session.label);
-                if (next !== null) {
-                  renameAgentSession(menu.session, next);
-                }
-              },
+              onSelect: () =>
+                setEditing({ id: menu.session.id, value: menu.session.label }),
             },
             {
               id: "close",
