@@ -25,6 +25,12 @@
   transition-property: height;
 }
 
+/* Content-sized regions wrap their children so the natural height is
+   measurable; the wrapper never constrains them. */
+.collapse--auto > .collapse__content {
+  min-height: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .collapse {
     transition: none;

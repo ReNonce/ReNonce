@@ -1,0 +1,270 @@
+/**
+ * @title Git diff view styles
+ * @notice GitHub-shaped diff: sticky file headers with colored status badges,
+ * two number columns, and soft tints for added and removed rows.
+ * @dev Row backgrounds come from the ANSI `-soft` tokens, so a theme switch
+ * re-tints the patch without re-rendering the rows.
+ */
+
+.git-diff {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.git-diff[data-active="false"] {
+  visibility: hidden;
+}
+
+.git-diff__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 0 8px 0 12px;
+  height: 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.git-diff__title {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.git-diff__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.git-diff__hash {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 0 4px;
+  border-radius: calc(var(--radius) - 6px);
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.git-diff__copy {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.git-diff__copy:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.git-diff__copy:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.git-diff__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.git-diff__file + .git-diff__file {
+  margin-top: 6px;
+}
+
+/* File header doubles as the disclosure control for that file's rows. */
+.git-diff__file-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 3px 12px;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--muted);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.git-diff__file-head:hover {
+  background: var(--accent);
+}
+
+.git-diff__file-head:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.git-diff__file-head .chevron {
+  color: inherit;
+}
+
+.git-diff__status {
+  padding: 0 5px;
+  border-radius: calc(var(--radius) - 6px);
+  font-size: 11px;
+}
+
+.git-diff__status--added {
+  background: var(--ansi-2-soft);
+  color: var(--ansi-2);
+}
+
+.git-diff__status--deleted {
+  background: var(--ansi-1-soft);
+  color: var(--ansi-1);
+}
+
+.git-diff__status--renamed {
+  background: var(--ansi-3-soft);
+  color: var(--ansi-3);
+}
+
+.git-diff__status--modified {
+  background: var(--ansi-4-soft);
+  color: var(--ansi-4);
+}
+
+.git-diff__file-path {
+  font-family: var(--font-mono);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.git-diff__counts {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.git-diff__count--add {
+  color: var(--ansi-2);
+}
+
+.git-diff__count--remove {
+  color: var(--ansi-1);
+}
+
+.git-diff__lines {
+  overflow-x: auto;
+}
+
+.git-diff__line {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 18px;
+  white-space: pre;
+}
+
+.git-diff__line--add {
+  background: var(--ansi-2-soft);
+}
+
+.git-diff__line--remove {
+  background: var(--ansi-1-soft);
+}
+
+.git-diff__line--hunk {
+  background: var(--ansi-6-soft);
+  color: var(--ansi-6);
+}
+
+.git-diff__line--note {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+/* One number column, drawn like the editor gutter: right-aligned, muted, with
+   the same hairline divider, so a row never shows the same line twice. */
+.git-diff__number {
+  flex: 0 0 auto;
+  width: 46px;
+  padding: 0 8px 0 0;
+  border-right: 1px solid var(--border);
+  text-align: right;
+  color: var(--muted-foreground);
+  user-select: none;
+}
+
+.git-diff__sign {
+  flex: 0 0 auto;
+  width: 12px;
+  color: var(--muted-foreground);
+  user-select: none;
+}
+
+.git-diff__line--add .git-diff__sign {
+  color: var(--ansi-2);
+}
+
+.git-diff__line--remove .git-diff__sign {
+  color: var(--ansi-1);
+}
+
+.git-diff__text {
+  padding-right: 16px;
+}
+
+.git-diff__state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  padding: 24px;
+  text-align: center;
+}
+
+.git-diff__state-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.git-diff__state-text {
+  margin: 0;
+  max-width: 420px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--muted-foreground);
+}
+
+.git-diff__loading {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}

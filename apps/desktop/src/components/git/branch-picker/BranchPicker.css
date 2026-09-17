@@ -1,0 +1,42 @@
+/**
+ * @title Branch picker styles
+ * @notice Tinted chip in the panel header; with more than one branch it becomes
+ * a button that opens the branch list.
+ */
+
+.branch-picker {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 1px 6px;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: var(--ansi-4-soft);
+  color: var(--ansi-4);
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.branch-picker--action {
+  cursor: pointer;
+}
+
+.branch-picker--action:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.branch-picker--action:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.branch-picker--action:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}

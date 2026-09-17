@@ -24,6 +24,8 @@ export interface ViewSwitcherProps {
   activeKey: string;
   /** Called with the clicked view key. */
   onSelect: (key: string) => void;
+  /** Accessible name for the group (e.g. "Main view", "Git mode"). */
+  label?: string;
 }
 
 /**
@@ -31,11 +33,17 @@ export interface ViewSwitcherProps {
  * @param props.items Segments to show.
  * @param props.activeKey Key of the active view.
  * @param props.onSelect Called with the clicked view key.
+ * @param props.label Accessible group name.
  * @return The switcher element.
  */
-export function ViewSwitcher({ items, activeKey, onSelect }: ViewSwitcherProps) {
+export function ViewSwitcher({
+  items,
+  activeKey,
+  onSelect,
+  label = "Main view",
+}: ViewSwitcherProps) {
   return (
-    <div className="view-switcher" role="group" aria-label="Main view">
+    <div className="view-switcher" role="group" aria-label={label}>
       {items.map((item) => (
         <button
           key={item.key}

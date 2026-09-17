@@ -1,46 +1,58 @@
 /**
  * @title Terminal sessions
  * @notice Tabs of the center panel, plus which one is active.
- * @dev Despite the terminal-flavoured names, a tab is either a terminal (`path`
- * is null) or a file editor (`path` is set); renaming this module to `tabs/` is
- * tracked as cleanup. Each tab owns its cwd/shell or its file, so switching tabs
- * never loses state. Opening a folder starts the first terminal automatically,
- * and the + button opens more. Tabs carry an automatic label that a rename can
- * replace (and a blank rename restores).
+ * @dev Despite the terminal-flavoured names, a tab is one of three kinds: a
+ * terminal (`path` is null), a file editor, or a commit diff — the diff kind
+ * keeps the repo root in `path` and the hash in `commit`. Each tab owns its
+ * cwd/shell, file, or view, so switching tabs never loses state. Opening a
+ * folder starts the first terminal automatically, and the + button opens more.
+ * Tabs carry an automatic label that a rename can replace (and a blank rename
+ * restores). The git history list is not a tab: it replaces the file tree in
+ * the Files panel.
  */
 import { useSyncExternalStore } from "react";
 import { folderName } from "../files/path";
 import { getWorkspaceRoot, subscribeWorkspace } from "../workspace/workspace";
 
+/** What a tab shows. */
+export type TabKind = "terminal" | "editor" | "diff";
+
 export interface TerminalSession {
   /** Stable session id, also the PTY key for terminal tabs. */
   id: string;
+  /** What this tab renders. */
+  kind: TabKind;
   /** Folder the shell starts in, or null for the process default. */
   cwd: string | null;
   /** Shell picked in the + menu, or null for the platform default. */
   shell: string | null;
   /** Tab label. */
   label: string;
-  /** Absolute file path for editor tabs; null for terminal tabs. */
+  /** File path for editor tabs, repo root for git tabs; null for terminals. */
   path: string | null;
   /** Editor tabs only: code editor or rendered preview. */
   mode: TabMode;
+  /** Diff tabs only: full commit hash. */
+  commit: string | null;
 }
 
 /** Which view an editor tab shows. */
 export type TabMode = "code" | "preview";
 
-/** Whether a tab runs a shell rather than showing a file. */
+/** Whether a tab runs a shell rather than showing content. */
 export function isTerminalTab(session: TerminalSession): boolean {
-  return session.path === null;
+  return session.kind === "terminal";
 }
 
 function labelFor(cwd: string | null): string {
   return cwd === null ? "Terminal" : folderName(cwd);
 }
 
-/** Automatic tab name: the file, the shell it runs, or the project folder. */
+/** Automatic tab name: the file, the commit, the shell it runs, or the folder. */
 function defaultLabel(session: TerminalSession): string {
+  if (session.kind === "diff") {
+    return (session.commit ?? "").slice(0, 7);
+  }
   if (session.path !== null) {
     return folderName(session.path);
   }
@@ -55,11 +67,13 @@ function createSession(cwd: string | null, shell: string | null): TerminalSessio
   counter += 1;
   const session: TerminalSession = {
     id: `terminal-${Date.now()}-${counter}`,
+    kind: "terminal",
     cwd,
     shell,
     label: "",
     path: null,
     mode: "code",
+    commit: null,
   };
   return { ...session, label: defaultLabel(session) };
 }
@@ -194,7 +208,7 @@ export function getActiveTerminalId(): string {
  * @return The editor tab's id.
  */
 export function openFileTab(path: string, mode: TabMode = "code"): string {
-  const existing = sessions.find((session) => session.path === path);
+  const existing = sessions.find((session) => session.kind === "editor" && session.path === path);
   if (existing !== undefined) {
     setActiveTerminal(existing.id);
     setTabMode(existing.id, mode);
@@ -203,11 +217,45 @@ export function openFileTab(path: string, mode: TabMode = "code"): string {
   counter += 1;
   const session: TerminalSession = {
     id: `file-${Date.now()}-${counter}`,
+    kind: "editor",
     cwd: null,
     shell: null,
     label: folderName(path),
     path,
     mode,
+    commit: null,
+  };
+  sessions = [...sessions, session];
+  activeId = session.id;
+  notify();
+  return session.id;
+}
+
+/**
+ * @notice Opens one commit's diff, or focuses the tab already showing it.
+ * @param root Folder the commit belongs to.
+ * @param commit Full commit hash.
+ * @return The diff tab's id.
+ */
+export function openCommitDiffTab(root: string, commit: string): string {
+  const existing = sessions.find(
+    (session) =>
+      session.kind === "diff" && session.path === root && session.commit === commit,
+  );
+  if (existing !== undefined) {
+    setActiveTerminal(existing.id);
+    return existing.id;
+  }
+  counter += 1;
+  const session: TerminalSession = {
+    id: `diff-${Date.now()}-${counter}`,
+    kind: "diff",
+    cwd: null,
+    shell: null,
+    label: commit.slice(0, 7),
+    path: root,
+    mode: "code",
+    commit,
   };
   sessions = [...sessions, session];
   activeId = session.id;

@@ -6,6 +6,7 @@
 use serde::Serialize;
 use std::fs;
 
+mod git;
 mod pty;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -243,6 +244,22 @@ pub fn run() {
             delete_entry,
             trash_entry,
             copy_entry,
+            git::git_log,
+            git::git_unpushed,
+            git::git_status,
+            git::git_stage,
+            git::git_unstage,
+            git::git_commit,
+            git::git_push,
+            git::git_remotes,
+            git::git_fetch,
+            git::git_pull,
+            git::git_push_to,
+            git::git_force_push,
+            git::git_repo_info,
+            git::git_branches,
+            git::git_checkout,
+            git::git_commit_detail,
             pty::list_shells,
             pty::pty_open,
             pty::pty_write,

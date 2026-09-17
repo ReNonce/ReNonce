@@ -34,8 +34,11 @@ import { folderName } from "../../../files/path";
 import { openFileTab, openTerminal } from "../../../terminal/sessions";
 import { useWorkspace } from "../../../workspace/workspace";
 import { MaskIcon } from "../../icons/mask-icon/MaskIcon";
+import { GitCommitView } from "../../git/git-commit/GitCommitView";
+import { GitHistoryView } from "../../git/git-history/GitHistoryView";
 import { ContextMenu } from "../../ui/context-menu/ContextMenu";
 import type { ContextMenuItem } from "../../ui/context-menu/ContextMenu";
+import { Chevron } from "../../ui/chevron/Chevron";
 import { FileSearch } from "../file-search/FileSearch";
 import "./FileExplorer.css";
 
@@ -149,27 +152,6 @@ function DraftRow({ depth, tree }: { depth: number; tree: TreeHandlers }) {
         onBlur={tree.cancelDraft}
       />
     </div>
-  );
-}
-
-function Chevron({ open }: { open: boolean }) {
-  return (
-    <svg
-      className={`file-explorer__chevron${open ? " file-explorer__chevron--open" : ""}`}
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M9 6l6 6-6 6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
 
@@ -309,7 +291,7 @@ function FileNode({ entry, depth, tree }: NodeProps) {
         }}
         onClick={() => openFileTab(entry.path)}
       >
-        <span className="file-explorer__chevron" aria-hidden="true" />
+        <span className="file-explorer__chevron-slot" aria-hidden="true" />
         <MaskIcon src="/assets/icons/file.svg" />
         <span className="file-explorer__name">{entry.name}</span>
       </button>
@@ -324,6 +306,7 @@ export function FileExplorer() {
   const { root } = useWorkspace();
   const clipboard = useFileClipboard();
   const [entries, setEntries] = useState<DirEntry[] | null>(null);
+  const [mode, setMode] = useState<"files" | "history" | "commit">("files");
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<DirEntry[] | null>(null);
@@ -644,14 +627,16 @@ export function FileExplorer() {
   }
 
   return (
-    <div
-      className="file-explorer"
-      onContextMenu={(event) => {
-        event.preventDefault();
-        setMenu({ x: event.clientX, y: event.clientY, entry: null });
-      }}
-    >
-      <div className="file-explorer__top">
+    <div className="file-explorer" data-mode={mode}>
+      <div
+        className="file-explorer__panel"
+        hidden={mode !== "files"}
+        onContextMenu={(event) => {
+          event.preventDefault();
+          setMenu({ x: event.clientX, y: event.clientY, entry: null });
+        }}
+      >
+        <div className="file-explorer__top">
         <FileSearch value={query} onChange={setQuery} />
 
         <div className="file-explorer__actions">
@@ -733,9 +718,54 @@ export function FileExplorer() {
           )}
         </>
       )}
+      </div>
 
-      {/* Reserved strip: explorer status and actions land here later. */}
-      <div className="file-explorer__bottom" />
+      {mode === "history" && <GitHistoryView root={root} />}
+      {mode === "commit" && <GitCommitView root={root} />}
+
+      {/* Bottom strip: the two git entry points for the open folder, one per
+          end — history on the left, commit on the right. */}
+      <div className="file-explorer__bottom">
+        <button
+          type="button"
+          className="file-explorer__bottom-action"
+          aria-pressed={mode === "history"}
+          title={mode === "history" ? "Back to files" : "Show git history"}
+          disabled={root === null}
+          onClick={() =>
+            setMode((current) => (current === "history" ? "files" : "history"))
+          }
+        >
+          <MaskIcon
+            src={
+              mode === "history"
+                ? "/assets/icons/file_tree.svg"
+                : "/assets/icons/git_graph.svg"
+            }
+            size={14}
+          />
+          {mode === "history" ? "Files" : "History"}
+        </button>
+
+        <button
+          type="button"
+          className="file-explorer__bottom-action"
+          aria-pressed={mode === "commit"}
+          title={mode === "commit" ? "Back to files" : "Commit changes"}
+          disabled={root === null}
+          onClick={() => setMode((current) => (current === "commit" ? "files" : "commit"))}
+        >
+          <MaskIcon
+            src={
+              mode === "commit"
+                ? "/assets/icons/file_tree.svg"
+                : "/assets/icons/git_commit.svg"
+            }
+            size={14}
+          />
+          {mode === "commit" ? "Files" : "Commit"}
+        </button>
+      </div>
 
       {menu !== null && (
         <ContextMenu

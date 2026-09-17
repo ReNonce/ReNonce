@@ -13,6 +13,16 @@
   min-height: 100%;
 }
 
+/* The commit view owns its own scrolling: a definite panel height lets the
+   change list scroll inside while the compose stays pinned at the bottom.
+   `border-box` keeps the panel's own padding from overflowing the height. */
+.file-explorer[data-mode="commit"] {
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
 /* Search, the Quick action header, and the new-entry field stick together at
    the top; only the tree and search results scroll underneath them. */
 .file-explorer__top {
@@ -25,9 +35,9 @@
   background: var(--sidebar);
 }
 
-/* Reserved strip under the tree: sticky so it stays visible while the tree
+/* Bottom strip under the tree: sticky so it stays visible while the tree
    scrolls, pushed to the bottom by the auto margin when the tree is shorter.
-   Empty for now — status and actions land here later. */
+   Carries the git history entry point for the open folder. */
 .file-explorer__bottom {
   position: sticky;
   bottom: 0;
@@ -44,6 +54,40 @@
   background: var(--sidebar);
   color: var(--muted-foreground);
   font-size: 12px;
+}
+
+.file-explorer__bottom-action {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 18px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: calc(var(--radius) - 6px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.file-explorer__bottom-action:hover:not(:disabled) {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+.file-explorer__bottom-action[aria-pressed="true"] {
+  color: var(--ansi-4);
+}
+
+.file-explorer__bottom-action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.file-explorer__bottom-action:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
 }
 
 .file-explorer__actions {
@@ -145,17 +189,12 @@
   color: var(--sidebar-accent-foreground);
 }
 
-.file-explorer__chevron {
+/* Empty slot kept where a folder's chevron sits, so file icons line up. */
+.file-explorer__chevron-slot {
   display: block;
   flex: 0 0 auto;
   width: 12px;
   height: 12px;
-  color: var(--muted-foreground);
-  transition: transform 140ms var(--motion-easing, ease);
-}
-
-.file-explorer__chevron--open {
-  transform: rotate(90deg);
 }
 
 .file-explorer__row {

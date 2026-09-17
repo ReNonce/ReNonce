@@ -93,7 +93,11 @@ desktop/
 - Workspace: the open folder and the auto-save flag live in `src/workspace/`
   (persisted in `renonce.workspace`). The top bar's **Files** menu opens a folder
   through `@tauri-apps/plugin-dialog`, and the Files view lists it with the
-  backend `read_dir` command plus a recursive name search (`search_files`).
+  backend `read_dir` command plus a recursive name search (`search_files`). The
+  bottom bar carries a folder breadcrumb: the three deepest levels stay visible
+  (`…` lists the hidden ones), clicking a level opens it as the workspace, the
+  trailing `+` steps into a folder inside the current one, and a level's
+  right-click menu adds the folder actions plus `Close Folder Level`.
 - Terminal: the center panel runs xterm.js against a Rust PTY
   (`src-tauri/src/pty.rs`, `portable-pty`). The shell starts in the open folder
   (Unix `$SHELL`; Windows `pwsh` → `powershell` → `cmd`), output streams over a
@@ -108,5 +112,22 @@ desktop/
   JS/TS, JSON, Markdown, Rust, and Python. Syntax colors read the theme's ANSI
   variables, so switching themes recolors code for free; Ctrl/Cmd+S saves through
   the backend, which caps files at 2 MiB.
+- Git: the strip under the file tree holds two entry points, one per end —
+  **History** on the left and **Commit** on the right — and either one swaps the
+  Files panel for that view (`src/components/git/`, backed by
+  `src-tauri/src/git.rs` shelling out to `git`). History groups commits by day with
+  an author avatar (initials tinted from the palette — offline, no network),
+  message, short hash, relative time, and ref badges; clicking one opens that
+  commit's diff as a center tab with per-file status badges, +/− counts, a single
+  line-number gutter, tinted added/removed rows, and a chevron per file that
+  minimizes the patch through the shared `Collapse` primitive (the same motion as
+  the sidebars). Commit lists the changed paths with track/untrack checkboxes, a
+  message field, and a commit button; it then flips to Push, which lists the
+  commits that are not upstream yet (each opening its diff) behind a push button.
+  A shared `BranchPicker` sits in both headers and only becomes a dropdown when
+  the repository has more than one local branch — switching runs a real
+  `git checkout`, which is what redirects a commit or push. Staging, committing,
+  pushing, and branch names all run through git; every failure surfaces git's own
+  message.
 - Repo-level docs: [`../../README.md`](../../README.md),
   [`../../AGENT.md`](../../AGENT.md).

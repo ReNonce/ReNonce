@@ -1,0 +1,16 @@
+/**
+ * @title Chevron styles
+ * @notice Muted by default so it reads as chrome, and rotates on the shared
+ * motion easing.
+ */
+
+.chevron {
+  display: block;
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+  transition: transform 140ms var(--motion-easing, ease);
+}
+
+.chevron--open {
+  transform: rotate(90deg);
+}

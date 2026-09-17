@@ -1,0 +1,15 @@
+/**
+ * @title Commit avatar styles
+ * @notice Circle tinted with a palette color; the initials carry the strong
+ * color so the badge reads on both light and dark themes.
+ */
+
+.commit-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  user-select: none;
+}
