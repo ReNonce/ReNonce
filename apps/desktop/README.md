@@ -128,7 +128,10 @@ desktop/
   permissions, so it cannot be "read-only" — only the app's own file commands
   can be gated by consent. The center header holds a horizontally scrollable tab
   strip: `+` opens more terminals (the default shell or a profile from
-  `list_shells`).
+  `list_shells`). The **Command** button beside the strip opens the saved
+  commands (`src/commands/`): a row runs immediately — in the active terminal,
+  or in a terminal opened for it in the open folder when none is listening — and
+  the palette's form adds and removes them.
 - Editor: opening a file from the explorer adds a center tab with CodeMirror 6
   (`src/components/editor/editor-surface/`): line numbers, selection, and syntax
   highlighting for the whole catalogue CodeMirror ships — the official language

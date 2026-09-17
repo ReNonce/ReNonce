@@ -18,6 +18,7 @@ already installed on the machine.
 | **Agent usage** | One button reveals each agent's account limits, read from that provider's own source (local files, OAuth usage endpoint, CLI statusline mirror, or console API). Values that cannot be read are not shown. |
 | **Credential settings** | Providers whose limits live behind a web session (MiniMax, opencode) take a pasted cookie in Settings, stored on this machine only. |
 | **Terminal** | Tabs with a right-click menu (close, close others, close all), shell picker, theme-aware ANSI palette, and PTY session lifecycle. |
+| **Quick actions** | Saved shell commands, scoped to the project or the whole app, listed in the palette behind the terminal header's **Command** button with a `+` form to add one and a × to remove one. Running one types it into the active terminal — and opens a terminal in the open folder when none is live. |
 | **Themes** | 15 built-in themes (catppuccin, dracula, gruvbox, nord, rose-pine, solarized, tokyo-night, xcode and more) with light/dark/system modes. |
 | **Keymap** | Every shortcut is a rebindable action, shown inline in search fields. |
 | **Layout** | Three-column workspace (sidebar, center tabs, view switcher), collapsible panels with a shared collapse animation, and full-width settings screens. |

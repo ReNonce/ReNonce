@@ -2,10 +2,11 @@
  * @title Command palette
  * @notice Picker for quick actions: search, the project and global command
  * lists, and the form that creates new ones.
- * @dev A row types its command into the active terminal session, so it behaves
- * like typing it at the prompt. Chrome comes from `PaletteShell`; only the
- * search field forwards arrows and Enter, so the form inputs keep their own
- * keyboard handling.
+ * @dev A row runs its command in the active terminal, and opens one in the open
+ * folder when nothing is listening — a quick action never needs a terminal
+ * prepared first. Chrome comes from `PaletteShell`; only the search field
+ * forwards arrows and Enter, so the form inputs keep their own keyboard
+ * handling.
  */
 import { useState } from "react";
 import type { FormEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
@@ -19,7 +20,6 @@ import {
 import type { CommandScope, SavedCommand } from "../../../commands/commands";
 import { runSavedCommand } from "../../../commands/run";
 import { closePalette } from "../../../palette/palette";
-import { useActiveTerminalId } from "../../../terminal/sessions";
 import { useWorkspace } from "../../../workspace/workspace";
 import { CommandRow } from "../../command/command-row/CommandRow";
 import { Select } from "../../ui/select/Select";
@@ -32,11 +32,9 @@ export function CommandPalette() {
   const [formOpen, setFormOpen] = useState(false);
   const [label, setLabel] = useState("");
   const [command, setCommand] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [scope, setScope] = useState<CommandScope>("project");
   const projectCommands = useProjectCommands();
   const globalCommands = useGlobalCommands();
-  const canRun = useActiveTerminalId() !== "";
   const { root } = useWorkspace();
 
   const needle = query.trim().toLowerCase();
@@ -50,11 +48,8 @@ export function CommandPalette() {
   const activeIndex = Math.min(selected, Math.max(items.length - 1, 0));
 
   const run = (entry: SavedCommand) => {
-    if (runSavedCommand(entry.command)) {
-      closePalette();
-      return;
-    }
-    setError("Could not reach the terminal — open one with + first.");
+    runSavedCommand(entry.command);
+    closePalette();
   };
 
   const onSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
@@ -141,8 +136,6 @@ export function CommandPalette() {
         </form>
       )}
 
-      {error !== null && <p className="palette-shell__empty">{error}</p>}
-
       {items.length === 0 && !formOpen && (
         <p className="palette-shell__empty">No commands yet — press + to add one.</p>
       )}
@@ -183,10 +176,6 @@ export function CommandPalette() {
             />
           ))}
         </section>
-      )}
-
-      {items.length > 0 && !canRun && (
-        <p className="palette-shell__empty">Open a terminal to run commands.</p>
       )}
     </PaletteShell>
   );
