@@ -1,0 +1,75 @@
+/**
+ * @title Folder breadcrumb styles
+ * @notice Level chips along the left end of the bottom bar, VS Code style: no
+ * boxes, only a hover fill and a heavier current level.
+ * @dev The strip is the scroll container so a deep path slides instead of
+ * widening the bar; the scrollbar stays hidden.
+ */
+
+.folder-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+  min-width: 0;
+  height: 100%;
+}
+
+.folder-breadcrumb__strip {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.folder-breadcrumb__strip::-webkit-scrollbar {
+  display: none;
+}
+
+.folder-breadcrumb__level {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.folder-breadcrumb__separator {
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+
+.folder-breadcrumb__chip {
+  max-width: 180px;
+  overflow: hidden;
+  padding: 2px 5px;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.folder-breadcrumb__chip:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.folder-breadcrumb__chip[data-current="true"] {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.folder-breadcrumb__chip--step-in {
+  padding: 2px 6px;
+  font-weight: 600;
+}
+
+.folder-breadcrumb__chip:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}

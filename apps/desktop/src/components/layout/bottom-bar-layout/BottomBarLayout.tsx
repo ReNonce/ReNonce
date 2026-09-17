@@ -1,10 +1,11 @@
 /**
  * @title Bottom bar layout
  * @notice Fixed chrome below the content area — VS Code-style bottom bar with
- * the settings entry point.
+ * the folder breadcrumb on the left and the settings entry point on the right.
  * @dev Border on the top edge only (content sits above). The settings button
  * toggles the full-width settings view; that state is owned by AppLayout.
  */
+import { FolderBreadcrumb } from "./folder-breadcrumb/FolderBreadcrumb";
 import { SettingsButton } from "./settings-button/SettingsButton";
 import "./BottomBarLayout.css";
 
@@ -24,6 +25,7 @@ export interface BottomBarLayoutProps {
 export function BottomBarLayout({ settingsOpen, onToggleSettings }: BottomBarLayoutProps) {
   return (
     <footer className="bottom-bar-layout">
+      <FolderBreadcrumb />
       <SettingsButton active={settingsOpen} onToggle={onToggleSettings} />
     </footer>
   );
