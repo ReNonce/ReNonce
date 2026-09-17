@@ -26,6 +26,7 @@ import { CommandRow } from "../../command/command-row/CommandRow";
 import { PaletteShell } from "../../palette/palette-shell/PaletteShell";
 import { SearchField } from "../../ui/search-field/SearchField";
 import { SectionHeading } from "../../ui/section-heading/SectionHeading";
+import { AgentUsageBar } from "../agent-usage-bar/AgentUsageBar";
 import "./AgentView.css";
 
 export function AgentView() {
@@ -171,6 +172,8 @@ export function AgentView() {
           </section>
         </PaletteShell>
       )}
+
+      <AgentUsageBar />
     </div>
   );
 }

@@ -8,6 +8,7 @@ use std::fs;
 
 mod git;
 mod pty;
+mod usage;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 /// @notice Greets a user by name.
@@ -260,6 +261,7 @@ pub fn run() {
             git::git_branches,
             git::git_checkout,
             git::git_commit_detail,
+            usage::agent_usage,
             pty::list_shells,
             pty::pty_open,
             pty::pty_write,

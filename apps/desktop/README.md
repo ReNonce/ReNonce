@@ -106,7 +106,11 @@ desktop/
   a terminal that launches that CLI, so the run starts in one gesture. Sessions
   are listed under the section heading — selecting one brings its terminal back
   and moves the workspace to the session's folder — and closing the terminal
-  drops its row.
+  drops its row. The panel's bottom strip holds a **Usage** button: it opens a
+  list of every agent with the rolling limits that can be read from local CLI
+  state (Codex publishes 5-hour and weekly windows in its rollout logs, via
+  `src-tauri/src/usage.rs`), and says "not readable" for agents whose limits only
+  exist inside their own interface rather than estimating a number.
 - Terminal: the center panel runs xterm.js against a Rust PTY
   (`src-tauri/src/pty.rs`, `portable-pty`). The shell starts in the open folder
   (Unix `$SHELL`; Windows `pwsh` → `powershell` → `cmd`), output streams over a
