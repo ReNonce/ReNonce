@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { AGENT_CLIS } from "../../../agent/agents";
-import { USAGE_AGENT_KEYS, readAgentUsage, untilReset, usageLevel, usageNote } from "../../../agent/usage";
+import { USAGE_AGENT_KEYS, readAgentUsage, untilReset, usageLevel } from "../../../agent/usage";
 import type { AgentUsage } from "../../../agent/usage";
 import { MaskIcon } from "../../icons/mask-icon/MaskIcon";
 import { PaletteShell } from "../../palette/palette-shell/PaletteShell";
@@ -23,15 +23,7 @@ const REFRESH_MS = 60_000;
 /** Agents worth listing: the ones with a readable source. */
 const USAGE_AGENTS = AGENT_CLIS.filter((agent) => USAGE_AGENT_KEYS.includes(agent.key));
 
-export interface AgentUsageBarProps {
-  /**
-   * Session the user picked, if any: its agent and folder decide which run the
-   * per-session providers (Grok) summarise.
-   */
-  focus?: { agentKey: string; cwd: string | null } | null;
-}
-
-export function AgentUsageBar({ focus = null }: AgentUsageBarProps) {
+export function AgentUsageBar() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -41,7 +33,7 @@ export function AgentUsageBar({ focus = null }: AgentUsageBarProps) {
   const load = useCallback(() => {
     void Promise.all(
       USAGE_AGENTS.map((agent) =>
-        readAgentUsage(agent.key, focus?.cwd ?? null)
+        readAgentUsage(agent.key)
           .then((entry) => [agent.key, entry] as const)
           .catch(() => [agent.key, null] as const),
       ),
@@ -49,7 +41,7 @@ export function AgentUsageBar({ focus = null }: AgentUsageBarProps) {
       setUsage(Object.fromEntries(entries));
       setLoaded(true);
     });
-  }, [focus?.cwd]);
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -64,10 +56,13 @@ export function AgentUsageBar({ focus = null }: AgentUsageBarProps) {
   }, [open, load]);
 
   const needle = query.trim().toLowerCase();
+  // Only agents that actually answered are listed: an entry with nothing to show
+  // is dropped rather than sitting there saying "not readable".
+  const readable = USAGE_AGENTS.filter((agent) => usage[agent.key] != null);
   const visible =
     needle === ""
-      ? USAGE_AGENTS
-      : USAGE_AGENTS.filter(
+      ? readable
+      : readable.filter(
           (agent) =>
             agent.label.toLowerCase().includes(needle) ||
             agent.key.includes(needle) ||
@@ -125,7 +120,10 @@ export function AgentUsageBar({ focus = null }: AgentUsageBarProps) {
             </h2>
 
             {visible.map((agent, index) => {
-              const entry = usage[agent.key] ?? null;
+              const entry = usage[agent.key];
+              if (entry == null) {
+                return null;
+              }
               return (
                 <div
                   key={agent.key}
@@ -137,45 +135,31 @@ export function AgentUsageBar({ focus = null }: AgentUsageBarProps) {
                   </span>
                   <span className="agent-usage__name">{agent.label}</span>
 
-                  {entry === null || entry === undefined ? (
-                    <span
-                      className="agent-usage__none"
-                      title={loaded ? usageNote(agent.key) : undefined}
-                    >
-                      {loaded ? "not readable" : "checking…"}
-                    </span>
-                  ) : (
-                    <span className="agent-usage__windows">
-                      {entry.detail !== null && (
-                        <span
-                          className="agent-usage__window"
-                          data-level="low"
-                          title={entry.detail}
-                        >
-                          {entry.detail}
+                  <span className="agent-usage__windows">
+                    {entry.windows.map((window) => (
+                      <span
+                        key={window.label}
+                        className="agent-usage__window"
+                        data-level={usageLevel(window.usedPercent)}
+                        title={`${window.usedPercent}% used — resets in ${untilReset(window.resetsAt)}`}
+                      >
+                        <span className="agent-usage__label">{window.label}</span>
+                        <span className="agent-usage__value">
+                          {Math.round(window.usedPercent)}%
                         </span>
-                      )}
-                      {entry.windows.map((window) => (
-                        <span
-                          key={window.label}
-                          className="agent-usage__window"
-                          data-level={usageLevel(window.usedPercent)}
-                          title={`${window.usedPercent}% used — resets in ${untilReset(window.resetsAt)}`}
-                        >
-                          <span className="agent-usage__label">{window.label}</span>
-                          <span className="agent-usage__value">
-                            {Math.round(window.usedPercent)}%
-                          </span>
-                        </span>
-                      ))}
-                    </span>
-                  )}
+                      </span>
+                    ))}
+                  </span>
                 </div>
               );
             })}
 
             {visible.length === 0 && (
-              <p className="agent-usage__empty">No agent matches.</p>
+              <p className="agent-usage__empty">
+                {loaded
+                  ? "No usage limits available — sign in to an agent CLI to read them."
+                  : "Checking agent limits…"}
+              </p>
             )}
           </section>
         </PaletteShell>

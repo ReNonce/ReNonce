@@ -6,6 +6,7 @@
 use serde::Serialize;
 use std::fs;
 
+mod agents;
 mod git;
 mod pty;
 mod usage;
@@ -262,6 +263,7 @@ pub fn run() {
             git::git_checkout,
             git::git_commit_detail,
             usage::agent_usage,
+            agents::command_availability,
             pty::list_shells,
             pty::pty_open,
             pty::pty_write,

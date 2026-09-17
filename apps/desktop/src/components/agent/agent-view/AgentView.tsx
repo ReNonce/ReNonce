@@ -10,7 +10,7 @@
  */
 import { useEffect, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
-import { AGENT_CLIS } from "../../../agent/agents";
+import { AGENT_CLIS, installedAgents } from "../../../agent/agents";
 import type { AgentCli } from "../../../agent/agents";
 import {
   closeAgentSession,
@@ -38,7 +38,14 @@ export function AgentView() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerQuery, setPickerQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
-  const [focus, setFocus] = useState<{ agentKey: string; cwd: string | null } | null>(null);
+  // The picker only offers CLIs this machine actually has.
+  const [catalog, setCatalog] = useState<AgentCli[]>(AGENT_CLIS);
+
+  useEffect(() => {
+    installedAgents()
+      .then(setCatalog)
+      .catch(() => undefined);
+  }, []);
 
   // A closed terminal takes its agent session with it.
   const live = sessions.filter((session) =>
@@ -51,7 +58,7 @@ export function AgentView() {
       : live.filter((session) => session.label.toLowerCase().includes(needle));
 
   const agentNeedle = pickerQuery.trim().toLowerCase();
-  const matches = AGENT_CLIS.filter(
+  const matches = catalog.filter(
     (agent) =>
       agentNeedle === "" ||
       agent.label.toLowerCase().includes(agentNeedle) ||
@@ -133,10 +140,7 @@ export function AgentView() {
             label={session.label}
             hint={session.cwd === null ? undefined : folderName(session.cwd)}
             active={session.terminalId === activeTabId}
-            onSelect={() => {
-              setFocus({ agentKey: session.agentKey, cwd: session.cwd });
-              focusAgentSession(session);
-            }}
+            onSelect={() => focusAgentSession(session)}
             onRemove={() => closeAgentSession(session)}
             removeLabel={`Close ${session.label} session`}
           />
@@ -177,7 +181,7 @@ export function AgentView() {
         </PaletteShell>
       )}
 
-      <AgentUsageBar focus={focus} />
+      <AgentUsageBar />
     </div>
   );
 }

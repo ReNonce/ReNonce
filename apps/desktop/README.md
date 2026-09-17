@@ -108,12 +108,13 @@ desktop/
   and moves the workspace to the session's folder — and closing the terminal
   drops its row. The panel's bottom strip holds a **Usage** button: it lists the
   agents that publish an account-level limit — Codex (5-hour and weekly windows
-  from its own rollout logs) and Claude Code (plan windows, through the opt-in
-  statusline mirror in `scripts/claude-usage-mirror.sh`), both read in
-  `src-tauri/src/usage.rs`. Other agents report nothing readable: Grok publishes
-  tokens and cost per session rather than an account limit, Gemini and Copilot
-  keep quota inside their own interface, and opencode reports cost — so they stay
-  out of the list instead of showing a guess.
+  from its own rollout logs), Claude Code (plan windows, through the opt-in
+  statusline mirror in `scripts/claude-usage-mirror.sh`), Gemini (quota buckets
+  from the Code Assist endpoints its CLI uses), and Grok (its own billing
+  endpoint, read with the token the CLI stored) — all in `src-tauri/src/usage.rs`.
+  Each provider talks only to the endpoint its own CLI talks to and never starts a
+  completion, and agents without such a source stay out of the list rather than
+  showing a guess.
 - Terminal: the center panel runs xterm.js against a Rust PTY
   (`src-tauri/src/pty.rs`, `portable-pty`). The shell starts in the open folder
   (Unix `$SHELL`; Windows `pwsh` → `powershell` → `cmd`), output streams over a

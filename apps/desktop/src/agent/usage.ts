@@ -24,11 +24,9 @@ export interface UsageWindow {
 export interface AgentUsage {
   /** Agent key from the catalog, e.g. `codex`. */
   agentKey: string;
-  /** File or folder the numbers were read from. */
+  /** File or endpoint the numbers were read from. */
   source: string;
   windows: UsageWindow[];
-  /** One-line summary for providers that report totals instead of windows. */
-  detail: string | null;
   /** Unix seconds of the reading. */
   readAt: number;
 }
@@ -38,48 +36,23 @@ export interface AgentUsage {
  * @dev Per agent on purpose: with a large catalog only a few providers publish
  * readable limits, so the panel asks for the one the user selected.
  * @param agentKey Agent key from the catalog, e.g. `codex`.
- * @param cwd Folder of the picked session, used by per-session providers (Grok).
  * @return The provider's usage, or null when it cannot be read.
  */
-export async function readAgentUsage(
-  agentKey: string,
-  cwd: string | null = null,
-): Promise<AgentUsage | null> {
+export async function readAgentUsage(agentKey: string): Promise<AgentUsage | null> {
   if (!isTauri()) {
     return null;
   }
-  return invoke<AgentUsage | null>("agent_usage", { agentKey, cwd });
+  return invoke<AgentUsage | null>("agent_usage", { agentKey });
 }
 
 /**
- * @notice Agents whose usage limits the panel can actually show.
- * @dev Account-level limits only: Codex writes its 5-hour and weekly windows to
- * disk, and Claude Code hands them to a statusline command the mirror taps.
- * Grok publishes token and cost totals per session but no account limit, so it
- * stays out of the list; providers that report nothing readable are out too.
+ * @notice Agents whose usage limits the panel can show.
+ * @dev Each one publishes an account-level window: Codex writes its 5-hour and
+ * weekly windows to disk, Claude Code hands them to a statusline command the
+ * mirror taps, Gemini answers the Code Assist quota endpoints, and Grok answers
+ * its own billing endpoint. Agents without such a source stay out of the list.
  */
-export const USAGE_AGENT_KEYS = ["claude", "codex"];
-
-/**
- * @notice What an agent needs before its limits can be read.
- * @dev Shown next to the agent instead of a bare "not readable", so the missing
- * number is explained rather than mysterious.
- */
-const USAGE_NOTES: Record<string, string> = {
-  codex: "Read from Codex's own rollout logs.",
-  claude:
-    "Needs the statusline mirror: Claude only hands plan limits to a statusline command (see scripts/claude-usage-mirror.sh).",
-  grok: "Grok reports tokens and cost per session, not an account limit.",
-};
-
-/**
- * @notice Explanation for a provider without readable data.
- * @param agentKey Agent key from the catalog.
- * @return A short sentence, or a generic one for unknown keys.
- */
-export function usageNote(agentKey: string): string {
-  return USAGE_NOTES[agentKey] ?? "This agent does not publish its usage.";
-}
+export const USAGE_AGENT_KEYS = ["claude", "codex", "gemini", "grok"];
 
 /**
  * @notice Countdown to a window reset.

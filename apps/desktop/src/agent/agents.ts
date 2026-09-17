@@ -2,10 +2,11 @@
  * @title Agent catalog
  * @notice The agent CLIs a session can launch: label, icon from the local
  * collection, and the command typed into a fresh terminal.
- * @dev Commands are plain launcher names the shell resolves from PATH, so a CLI
- * that is not installed simply prints its own "command not found" inside the
- * session — nothing here needs to probe the system.
+ * @dev Commands are plain launcher names the shell resolves from PATH, and the
+ * backend reports which of them are actually installed, so the picker only offers
+ * what the machine can run.
  */
+import { invoke, isTauri } from "@tauri-apps/api/core";
 
 export interface AgentCli {
   /** Stable key, also used for icon lookups in the panel. */
@@ -72,4 +73,23 @@ export const AGENT_CLIS: AgentCli[] = [
  */
 export function agentByKey(key: string): AgentCli | undefined {
   return AGENT_CLIS.find((entry) => entry.key === key);
+}
+
+/**
+ * @notice Filters the catalog to the CLIs installed on this machine.
+ * @dev The picker only offers what the user actually has; outside the desktop
+ * shell every entry is kept, so the browser preview still shows the full catalog.
+ * @param agents Catalog to filter; defaults to the whole catalog.
+ * @return The installed entries.
+ */
+export async function installedAgents(
+  agents: AgentCli[] = AGENT_CLIS,
+): Promise<AgentCli[]> {
+  if (!isTauri()) {
+    return agents;
+  }
+  const available = await invoke<string[]>("command_availability", {
+    commands: agents.map((agent) => agent.command),
+  });
+  return agents.filter((agent) => available.includes(agent.command));
 }
