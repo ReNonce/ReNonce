@@ -60,6 +60,9 @@
 }
 
 .agent-view__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   padding: 2px 6px 8px;
 }
 
