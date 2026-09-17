@@ -7,6 +7,7 @@
  * read simply does not appear instead of showing a guess.
  */
 import { invoke, isTauri } from "@tauri-apps/api/core";
+import { getAgentCredential } from "./credentials";
 
 /** One rolling limit window of a provider. */
 export interface UsageWindow {
@@ -34,7 +35,9 @@ export interface AgentUsage {
 /**
  * @notice Reads the usage limits of one agent.
  * @dev Per agent on purpose: with a large catalog only a few providers publish
- * readable limits, so the panel asks for the one the user selected.
+ * readable limits, so the panel asks for the one the user selected. A stored
+ * credential goes along for the providers that read a web session (Minimax,
+ * opencode) and is ignored by the others.
  * @param agentKey Agent key from the catalog, e.g. `codex`.
  * @return The provider's usage, or null when it cannot be read.
  */
@@ -42,7 +45,11 @@ export async function readAgentUsage(agentKey: string): Promise<AgentUsage | nul
   if (!isTauri()) {
     return null;
   }
-  return invoke<AgentUsage | null>("agent_usage", { agentKey });
+  const credential = getAgentCredential(agentKey);
+  return invoke<AgentUsage | null>("agent_usage", {
+    agentKey,
+    credential: credential === "" ? null : credential,
+  });
 }
 
 /**

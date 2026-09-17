@@ -1,0 +1,58 @@
+/**
+ * @title Usage credentials styles
+ * @notice One labelled field per agent that needs a session, on the settings
+ * surface.
+ */
+
+.usage-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 560px;
+}
+
+.usage-settings__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.usage-settings__note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--muted-foreground);
+}
+
+.usage-settings__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.usage-settings__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  width: 150px;
+  font-size: 13px;
+}
+
+.usage-settings__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 13px;
+}
+
+.usage-settings__input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}

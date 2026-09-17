@@ -15,6 +15,7 @@ import { SettingsMenu } from "../settings-menu/SettingsMenu";
 import type { SettingsMenuGroup } from "../settings-menu/SettingsMenu";
 import { KeymapSettings } from "../keymap-settings/KeymapSettings";
 import { ThemeSettings } from "../theme-settings/ThemeSettings";
+import { UsageSettings } from "../usage-settings/UsageSettings";
 import "./SettingsView.css";
 
 const GROUPS: SettingsMenuGroup[] = [
@@ -30,6 +31,11 @@ const GROUPS: SettingsMenuGroup[] = [
         label: "Keymap",
         icon: <MaskIcon src="/assets/icons/keyboard.svg" />,
       },
+      {
+        key: "usage",
+        label: "Usage credentials",
+        icon: <MaskIcon src="/assets/icons/signal_high.svg" />,
+      },
     ],
   },
 ];
@@ -37,6 +43,7 @@ const GROUPS: SettingsMenuGroup[] = [
 const CONTENT: Record<string, ReactNode> = {
   theme: <ThemeSettings />,
   keymap: <KeymapSettings />,
+  usage: <UsageSettings />,
 };
 
 export function SettingsView() {

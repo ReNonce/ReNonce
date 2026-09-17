@@ -72,6 +72,13 @@ export const AGENT_CLIS: AgentCli[] = [
     description: "Moonshot's coding agent",
   },
   {
+    key: "minimax",
+    label: "MiniMax",
+    iconSrc: "/assets/icons/ai_model.svg",
+    command: "minimax",
+    description: "MiniMax's coding agent",
+  },
+  {
     key: "antigravity",
     label: "Antigravity",
     iconSrc: "/assets/icons/ai_google.svg",
