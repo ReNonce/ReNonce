@@ -75,15 +75,15 @@ export const AGENT_CLIS: AgentCli[] = [
     key: "minimax",
     label: "MiniMax",
     iconSrc: "/assets/icons/ai_model.svg",
-    command: "minimax",
+    command: "mcode",
     description: "MiniMax's coding agent",
   },
   {
     key: "antigravity",
     label: "Antigravity",
     iconSrc: "/assets/icons/ai_google.svg",
-    command: "antigravity",
-    description: "Google's agentic IDE",
+    command: "agy",
+    description: "Google's agentic CLI",
   },
 ];
 
@@ -95,12 +95,14 @@ export const AGENT_CLIS: AgentCli[] = [
  * guessing at an argument that would not be understood.
  */
 const RESUME_ARGS: Record<string, string> = {
+  antigravity: "--continue",
   claude: "--continue",
   codex: "resume --last",
   copilot: "--continue",
   gemini: "--resume",
   grok: "--resume",
   kimi: "--continue",
+  minimax: "--continue",
   opencode: "--continue",
 };
 
@@ -119,12 +121,14 @@ const SESSION_ID_FLAG: Record<string, string> = {
 
 /** How a CLI is asked to open one exact conversation. */
 const RESUME_WITH_ID: Record<string, string> = {
+  antigravity: "--conversation",
   claude: "--resume",
   codex: "resume",
   copilot: "--resume",
   gemini: "--resume",
   grok: "--resume",
   kimi: "--session",
+  minimax: "--session",
   opencode: "--session",
 };
 
