@@ -15,7 +15,7 @@ import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 import type { TerminalSession } from "../../../terminal/sessions";
 import { takeInitialCommand } from "../../../terminal/sessions";
-import { notifyAgentExit } from "../../../agent/sessions";
+import { captureAgentOutput, notifyAgentExit } from "../../../agent/sessions";
 import type { TerminalColors, ThemeColors } from "../../../theme/types";
 import { useTheme } from "../../../theme/useTheme";
 import "./TerminalSurface.css";
@@ -159,7 +159,11 @@ export function TerminalSurface({ session, active }: TerminalSurfaceProps) {
     const channel = new Channel<PtyEvent>();
     channel.onmessage = (event) => {
       if (event.kind === "data" && event.data !== undefined) {
-        term.write(decodeBase64(event.data));
+        const chunk = decodeBase64(event.data);
+        term.write(chunk);
+        // Agents name the conversation to resume on their last line; keeping the
+        // tail is what lets the session row come back to that exact one.
+        captureAgentOutput(id, new TextDecoder().decode(chunk));
       } else if (event.kind === "exit") {
         term.write("\r\n\x1b[2m[process exited]\x1b[0m\r\n");
         // An agent CLI that quit should not leave a dead terminal behind, and its

@@ -31,6 +31,8 @@ export interface AgentSession {
   cwd: string | null;
   /** Terminal tab backing this run; empty once the CLI has exited. */
   terminalId: string;
+  /** Exact command the CLI printed to come back to this conversation. */
+  resumeCommand: string | null;
 }
 
 let sessions: AgentSession[] = [];
@@ -84,6 +86,7 @@ export function openAgentSession(agent: AgentCli, cwd: string | null): AgentSess
     iconSrc: agent.iconSrc,
     cwd,
     terminalId,
+    resumeCommand: null,
   };
   sessions = [...sessions, session];
   notify();
@@ -110,9 +113,13 @@ export function focusAgentSession(session: AgentSession): void {
     return;
   }
   counter += 1;
-  const resume = resumeArgsFor(agent.key);
-  const command = resume === null ? agent.command : `${agent.command} ${resume}`;
-  const terminalId = openTerminal(session.cwd, null, command);
+  const resume =
+    session.resumeCommand ??
+    (() => {
+      const args = resumeArgsFor(agent.key);
+      return args === null ? agent.command : `${agent.command} ${args}`;
+    })();
+  const terminalId = openTerminal(session.cwd, null, resume);
   renameSession(terminalId, agent.label);
   sessions = sessions.map((candidate) =>
     candidate.id === session.id ? { ...candidate, terminalId } : candidate,
@@ -121,12 +128,65 @@ export function focusAgentSession(session: AgentSession): void {
   notify();
 }
 
+/** Escape sequences a CLI wraps its output in; stripped before a hint is read. */
+// eslint-disable-next-line no-control-regex
+const ANSI_PATTERN = /\u001b\[[0-9;?]*[ -/]*[@-~]/g;
+
+/** The line agents print on quit naming the conversation to come back to. */
+const RESUME_HINT = /\b([a-z][\w-]*)\s+(?:--resume|resume)\s+([0-9A-Za-z][0-9A-Za-z-]{7,})/;
+
+/** How much of a terminal's output is kept around to find that hint. */
+const TAIL_LIMIT = 8_000;
+
+/** Recent output per running terminal, dropped when the process ends. */
+const outputTails = new Map<string, string>();
+
+/**
+ * @notice Keeps the tail of a running agent terminal's output.
+ * @dev Only terminals an agent session owns are tracked, and only while they run:
+ * this exists to catch the resume hint a CLI prints on quit, and is dropped as
+ * soon as the session stops.
+ * @param terminalId Terminal the chunk came from.
+ * @param chunk Raw output, escape sequences included.
+ */
+export function captureAgentOutput(terminalId: string, chunk: string): void {
+  if (!sessions.some((candidate) => candidate.terminalId === terminalId)) {
+    return;
+  }
+  const tail = (outputTails.get(terminalId) ?? "") + chunk.replace(ANSI_PATTERN, "");
+  outputTails.set(terminalId, tail.length > TAIL_LIMIT ? tail.slice(-TAIL_LIMIT) : tail);
+}
+
+/**
+ * @notice Reads the resume command a CLI printed before it quit.
+ * @dev Agents name the exact conversation to come back to on their last line —
+ * `grok --resume 01a0…`, `codex resume 5b1c…` — and that id is worth keeping:
+ * the folder's most recent conversation is not always the one that was open. The
+ * arguments are taken from the printed line while the command itself comes from
+ * the catalog, so a path or wrapper in the output cannot leak into the launch.
+ * @param terminalId Terminal that exited.
+ * @param agentKey Catalog key of the agent that ran.
+ * @return The command to run again, or null when nothing was printed.
+ */
+function takeResumeCommand(terminalId: string, agentKey: string): string | null {
+  const tail = outputTails.get(terminalId) ?? "";
+  outputTails.delete(terminalId);
+  const match = RESUME_HINT.exec(tail);
+  if (match === null) {
+    return null;
+  }
+  const agent = agentByKey(agentKey);
+  const command = agent === undefined ? match[1] : agent.command;
+  return `${command}${match[0].slice(match[1].length)}`;
+}
+
 /**
  * @notice Marks the session behind a terminal as no longer running.
  * @dev Called when a terminal's process exits. The tab is closed — a CLI that
  * quit should not leave a dead terminal behind — while the row stays, so the
- * conversation can be resumed from the panel. Only sessions this layer owns are
- * touched, so a plain shell terminal keeps the behaviour it had.
+ * conversation can be resumed from the panel, ideally by the exact command the
+ * CLI printed on its way out. Only sessions this layer owns are touched, so a
+ * plain shell terminal keeps the behaviour it had.
  * @param terminalId Terminal whose process exited.
  * @return True when an agent session was marked dormant.
  */
@@ -135,8 +195,11 @@ export function notifyAgentExit(terminalId: string): boolean {
   if (session === undefined) {
     return false;
   }
+  const captured = takeResumeCommand(terminalId, session.agentKey);
   sessions = sessions.map((candidate) =>
-    candidate.id === session.id ? { ...candidate, terminalId: "" } : candidate,
+    candidate.id === session.id
+      ? { ...candidate, terminalId: "", resumeCommand: captured ?? candidate.resumeCommand }
+      : candidate,
   );
   closeTerminal(terminalId);
   notify();
