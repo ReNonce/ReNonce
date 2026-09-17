@@ -583,6 +583,122 @@ async fn gemini_usage() -> Option<AgentUsage> {
     })
 }
 
+/// Reads a number that may arrive as a number or as a numeric string.
+fn as_number(value: Option<&serde_json::Value>) -> Option<f64> {
+    let value = value?;
+    value
+        .as_f64()
+        .or_else(|| value.as_str().and_then(|text| text.parse::<f64>().ok()))
+}
+
+/// Window length in minutes from a Kimi `window` block.
+fn kimi_window_minutes(window: Option<&serde_json::Value>) -> Option<u64> {
+    let window = window?;
+    let duration = as_number(window.get("duration"))?;
+    let unit = window
+        .get("timeUnit")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or("")
+        .to_uppercase();
+    let minutes = if unit.contains("MINUTE") {
+        duration
+    } else if unit.contains("HOUR") {
+        duration * 60.0
+    } else if unit.contains("DAY") {
+        duration * 60.0 * 24.0
+    } else if unit.contains("SECOND") {
+        duration / 60.0
+    } else {
+        duration
+    };
+    Some(minutes.round().max(1.0) as u64)
+}
+
+/// One usage window from a Kimi quota block.
+/// @dev Kimi reports `limit` with either `used` or `remaining`, so the used share
+/// is derived the same way its CLI derives it.
+fn kimi_window(detail: Option<&serde_json::Value>, minutes: u64) -> Option<UsageWindow> {
+    let detail = detail?;
+    let limit = as_number(detail.get("limit"))?;
+    if limit <= 0.0 {
+        return None;
+    }
+    let used = as_number(detail.get("used"))
+        .or_else(|| as_number(detail.get("remaining")).map(|remaining| limit - remaining))?;
+    let resets_at = detail
+        .get("resetTime")
+        .or_else(|| detail.get("resetAt"))
+        .and_then(serde_json::Value::as_str)
+        .and_then(iso_to_epoch)
+        .unwrap_or(0);
+    Some(UsageWindow {
+        label: window_label(minutes),
+        used_percent: (used / limit * 100.0).clamp(0.0, 100.0),
+        window_minutes: minutes,
+        resets_at,
+    })
+}
+
+/// Kimi's subscription usage, from the same `usages` endpoint its CLI reads.
+/// @dev Read-only: the token from `<kimi home>/credentials/kimi-code.json` goes
+/// out with a bearer header and nothing else, exactly as the CLI sends it. The
+/// file is used as-is — the CLI refreshes it on its next run.
+async fn kimi_usage() -> Option<AgentUsage> {
+    let home = home_dir()?;
+    let path = home
+        .join(".kimi")
+        .join("credentials")
+        .join("kimi-code.json");
+    let text = fs::read_to_string(&path).ok()?;
+    let credentials: serde_json::Value = serde_json::from_str(&text).ok()?;
+    let token = credentials
+        .get("access_token")
+        .and_then(serde_json::Value::as_str)
+        .filter(|token| !token.is_empty())?;
+
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .ok()?;
+    let response = client
+        .get("https://api.kimi.com/coding/v1/usages")
+        .bearer_auth(token)
+        .send()
+        .await
+        .ok()?;
+    if !response.status().is_success() {
+        return None;
+    }
+    let body: serde_json::Value = response.json().await.ok()?;
+
+    // The top-level block is the weekly quota; the `limits` entries carry the
+    // shorter rolling windows, the 5-hour one being the session view.
+    let mut windows = Vec::new();
+    if let Some(window) = kimi_window(body.get("usage"), 10_080) {
+        windows.push(window);
+    }
+    for limit in body
+        .get("limits")
+        .and_then(serde_json::Value::as_array)
+        .into_iter()
+        .flatten()
+    {
+        let minutes = kimi_window_minutes(limit.get("window")).unwrap_or(300);
+        if let Some(window) = kimi_window(limit.get("detail"), minutes) {
+            windows.push(window);
+        }
+    }
+    if windows.is_empty() {
+        return None;
+    }
+    Some(AgentUsage {
+        agent_key: "kimi".to_string(),
+        source: "Kimi Code usages API".to_string(),
+        windows,
+        read_at: now(),
+    })
+}
+
 /// @notice Reads the usage limits of one agent CLI.
 /// @dev Asked per agent, because only a few providers publish an account limit —
 /// the panel reveals the numbers for the agent the user picked instead of listing
@@ -597,6 +713,13 @@ pub async fn agent_usage(agent_key: String) -> Option<AgentUsage> {
         "claude" => claude_usage(),
         "grok" => grok_usage().await,
         "gemini" => gemini_usage().await,
+        // Antigravity has no reader of its own: it shares Google Code Assist
+        // quota with the Gemini CLI, so a successful Gemini read describes it too.
+        "antigravity" => gemini_usage().await.map(|usage| AgentUsage {
+            agent_key: "antigravity".to_string(),
+            ..usage
+        }),
+        "kimi" => kimi_usage().await,
         _ => None,
     }
 }

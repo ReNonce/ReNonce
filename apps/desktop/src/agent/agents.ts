@@ -64,6 +64,20 @@ export const AGENT_CLIS: AgentCli[] = [
     command: "copilot",
     description: "GitHub's coding agent",
   },
+  {
+    key: "kimi",
+    label: "Kimi Code",
+    iconSrc: "/assets/icons/ai_model.svg",
+    command: "kimi",
+    description: "Moonshot's coding agent",
+  },
+  {
+    key: "antigravity",
+    label: "Antigravity",
+    iconSrc: "/assets/icons/ai_google.svg",
+    command: "antigravity",
+    description: "Google's agentic IDE",
+  },
 ];
 
 /**

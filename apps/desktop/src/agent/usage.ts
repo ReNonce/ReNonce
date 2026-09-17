@@ -52,7 +52,7 @@ export async function readAgentUsage(agentKey: string): Promise<AgentUsage | nul
  * mirror taps, Gemini answers the Code Assist quota endpoints, and Grok answers
  * its own billing endpoint. Agents without such a source stay out of the list.
  */
-export const USAGE_AGENT_KEYS = ["claude", "codex", "gemini", "grok"];
+export const USAGE_AGENT_KEYS = ["antigravity", "claude", "codex", "gemini", "grok", "kimi"];
 
 /**
  * @notice Countdown to a window reset.
