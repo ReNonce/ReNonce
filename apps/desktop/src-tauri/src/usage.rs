@@ -789,8 +789,6 @@ async fn kimi_usage() -> Option<AgentUsage> {
     })
 }
 
-/// @notice Reads the usage limits of one agent CLI.
-/// @dev Asked per agent, because only a few providers publish an account limit —
 // ---------------------------------------------------------------------------
 // Web sessions (MiniMax, opencode)
 // ---------------------------------------------------------------------------
@@ -993,7 +991,7 @@ fn opencode_block(text: &str, key: &str) -> Option<(f64, i64)> {
             top_level_number(block, "usagePercent"),
             top_level_number(block, "resetInSec"),
         ) {
-            return Some((percent, reset));
+            return Some((percent, reset as i64));
         }
     }
     None
