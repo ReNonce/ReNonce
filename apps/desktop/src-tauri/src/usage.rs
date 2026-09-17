@@ -791,18 +791,323 @@ async fn kimi_usage() -> Option<AgentUsage> {
 
 /// @notice Reads the usage limits of one agent CLI.
 /// @dev Asked per agent, because only a few providers publish an account limit —
-/// the panel reveals the numbers for the agent the user picked instead of listing
-/// every agent all the time. Providers that cannot be read answer `None`, which
-/// the panel states plainly rather than guessing.
+// ---------------------------------------------------------------------------
+// Web sessions (MiniMax, opencode)
+// ---------------------------------------------------------------------------
+
+/// Reads one cookie value out of either a `Cookie` header or a pasted pair list.
+/// @dev Both forms are accepted because browsers hand out the header form while
+/// devtools copy the `name: "value"` form, and neither should be a trap.
+fn cookie_value(raw: &str, name: &str) -> Option<String> {
+    for part in raw.split(';') {
+        let part = part.trim().trim_start_matches("Cookie:").trim();
+        if let Some((key, value)) = part.split_once('=') {
+            if key.trim() == name {
+                let value = value.trim();
+                if !value.is_empty() {
+                    return Some(value.to_string());
+                }
+            }
+        }
+        if let Some((key, value)) = part.split_once(':') {
+            if key.trim().trim_matches(['"', '\'']) == name {
+                let value = value.trim().trim_matches(['"', '\'', ' ']);
+                if !value.is_empty() {
+                    return Some(value.to_string());
+                }
+            }
+        }
+    }
+    None
+}
+
+/// Scales a timestamp down to seconds when it arrives in milliseconds.
+fn epoch_seconds(value: Option<&serde_json::Value>) -> Option<i64> {
+    let number = as_number(value)? as i64;
+    Some(if number > 10_000_000_000 {
+        number / 1000
+    } else {
+        number
+    })
+}
+
+/// Finds the first object in a payload that carries `key`.
+/// @dev These console APIs nest their usage item under envelopes that change
+/// without notice, so the item is found by its own field rather than by a path.
+fn find_object_with<'a>(value: &'a serde_json::Value, key: &str) -> Option<&'a serde_json::Value> {
+    match value {
+        serde_json::Value::Object(map) => {
+            if map.contains_key(key) {
+                return Some(value);
+            }
+            map.values().find_map(|child| find_object_with(child, key))
+        }
+        serde_json::Value::Array(items) => {
+            items.iter().find_map(|child| find_object_with(child, key))
+        }
+        _ => None,
+    }
+}
+
+/// MiniMax's plan windows, from the console endpoint its usage page calls.
+/// @dev Read-only, and the same request the console makes: a `Cookie` header that
+/// must carry `_token`, the group header when the cookie names one, and the
+/// console referer. Remaining percentages become used percentages.
+async fn minimax_usage(cookie: &str) -> Option<AgentUsage> {
+    let token = cookie_value(cookie, "_token")?;
+    let group = cookie_value(cookie, "minimax_group_id_v2");
+    let mut cookie_header = format!("_token={token}");
+    if let Some(group) = &group {
+        cookie_header.push_str(&format!("; minimax_group_id_v2={group}"));
+    }
+
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .ok()?;
+    let mut request = client
+        .get("https://platform.minimax.io/v1/api/openplatform/coding_plan/remains")
+        .header("Cookie", cookie_header)
+        .header("Referer", "https://platform.minimax.io/console/usage")
+        .header("Accept", "application/json");
+    if let Some(group) = &group {
+        request = request.header("X-Group-Id", group.as_str());
+    }
+    let response = request.send().await.ok()?;
+    if !response.status().is_success() {
+        return None;
+    }
+    let body: serde_json::Value = response.json().await.ok()?;
+    let item = find_object_with(&body, "current_interval_remaining_percent")?;
+
+    let mut windows = Vec::new();
+    if let Some(remaining) = as_number(item.get("current_interval_remaining_percent")) {
+        windows.push(UsageWindow {
+            label: "5h".to_string(),
+            used_percent: (100.0 - remaining).clamp(0.0, 100.0),
+            window_minutes: 300,
+            resets_at: epoch_seconds(item.get("end_time")).unwrap_or(0),
+        });
+    }
+    if let Some(remaining) = as_number(item.get("current_weekly_remaining_percent")) {
+        // The API exposes no weekly end time, only how long it still runs.
+        let resets_at = as_number(item.get("weekly_remains_time"))
+            .map(|seconds| now() + seconds as i64)
+            .unwrap_or(0);
+        windows.push(UsageWindow {
+            label: "7d".to_string(),
+            used_percent: (100.0 - remaining).clamp(0.0, 100.0),
+            window_minutes: 10_080,
+            resets_at,
+        });
+    }
+    if windows.is_empty() {
+        return None;
+    }
+    Some(AgentUsage {
+        agent_key: "minimax".to_string(),
+        source: "MiniMax console API".to_string(),
+        windows,
+        read_at: now(),
+    })
+}
+
+/// The site's server-function id for the workspaces call, and its origin.
+/// @dev The id belongs to their build, so it changes whenever they deploy — this
+/// is the value Orca ships, and the thing to update when opencode's shape moves.
+const OPENCODE_BASE_URL: &str = "https://opencode.ai";
+const OPENCODE_WORKSPACES_SERVER_ID: &str =
+    "def39973159c7f0483d8793a822b8dbb10d067e12c65455fcb4608459ba0234f";
+
+/// A numeric field at depth 1 of `block`.
+/// @dev Nested objects carrying the same name are skipped, which is what makes
+/// the placeholder duplicates in the page harmless.
+fn top_level_number(block: &str, field: &str) -> Option<f64> {
+    let needle = format!("{field}:");
+    let mut depth = 0_i64;
+    for (index, character) in block.char_indices() {
+        match character {
+            '{' => {
+                depth += 1;
+                continue;
+            }
+            '}' => {
+                depth -= 1;
+                continue;
+            }
+            _ => {}
+        }
+        if depth != 1 || !block[index..].starts_with(&needle) {
+            continue;
+        }
+        let rest = block[index + needle.len()..].trim_start();
+        let number: String = rest
+            .chars()
+            .take_while(|character| {
+                character.is_ascii_digit() || *character == '.' || *character == '-'
+            })
+            .collect();
+        if let Ok(value) = number.parse::<f64>() {
+            return Some(value);
+        }
+    }
+    None
+}
+
+/// The `usagePercent` and `resetInSec` of the first block carrying both.
+/// @dev The page is React Server Components output: a key appears several times,
+/// once with data and once as `null`, and a reference token such as `$R[28]=` may
+/// sit between the colon and the brace. This scrapes markup we do not control, so
+/// a miss answers None instead of a guess.
+fn opencode_block(text: &str, key: &str) -> Option<(f64, i64)> {
+    let needle = format!("{key}:");
+    let mut from = 0_usize;
+    while let Some(offset) = text[from..].find(&needle) {
+        let colon = from + offset + needle.len();
+        from = colon;
+        let window_end = (colon + 30).min(text.len());
+        let Some(brace_offset) = text[colon..window_end].find('{') else {
+            continue;
+        };
+        let open = colon + brace_offset;
+        let mut depth = 0_i64;
+        let mut close = None;
+        for (index, character) in text[open..].char_indices() {
+            match character {
+                '{' => depth += 1,
+                '}' => {
+                    depth -= 1;
+                    if depth == 0 {
+                        close = Some(open + index);
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+        let Some(close) = close else {
+            continue;
+        };
+        let block = &text[open..=close];
+        if let (Some(percent), Some(reset)) = (
+            top_level_number(block, "usagePercent"),
+            top_level_number(block, "resetInSec"),
+        ) {
+            return Some((percent, reset));
+        }
+    }
+    None
+}
+
+/// The workspace whose usage page is read: the first `id` the payload offers,
+/// preferring one inside a `workspaces` list.
+fn find_workspace_id(body: &serde_json::Value) -> Option<String> {
+    fn first_id(value: &serde_json::Value) -> Option<String> {
+        match value {
+            serde_json::Value::Object(map) => {
+                if let Some(serde_json::Value::String(id)) = map.get("id") {
+                    if !id.is_empty() {
+                        return Some(id.clone());
+                    }
+                }
+                map.values().find_map(first_id)
+            }
+            serde_json::Value::Array(items) => items.iter().find_map(first_id),
+            _ => None,
+        }
+    }
+    body.get("workspaces")
+        .and_then(first_id)
+        .or_else(|| first_id(body))
+}
+
+/// opencode's plan windows, read from its workspace page.
+/// @dev Two steps, like the site itself: the workspaces call names the workspace,
+/// then the `/go` page carries the numbers. opencode publishes no local source for
+/// these, so this is a scraper by necessity.
+async fn opencode_usage(credential: &str) -> Option<AgentUsage> {
+    let cookie = credential.trim();
+    if cookie.is_empty() {
+        return None;
+    }
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(15))
+        .build()
+        .ok()?;
+
+    let workspaces = client
+        .get(format!(
+            "{OPENCODE_BASE_URL}/_server?id={OPENCODE_WORKSPACES_SERVER_ID}"
+        ))
+        .header("Cookie", cookie)
+        .header("Origin", OPENCODE_BASE_URL)
+        .header("Referer", format!("{OPENCODE_BASE_URL}/"))
+        .send()
+        .await
+        .ok()?;
+    if !workspaces.status().is_success() {
+        return None;
+    }
+    let body: serde_json::Value = workspaces.json().await.ok()?;
+    let workspace_id = find_workspace_id(&body)?;
+
+    let page = client
+        .get(format!("{OPENCODE_BASE_URL}/workspace/{workspace_id}/go"))
+        .header("Cookie", cookie)
+        .header("Origin", OPENCODE_BASE_URL)
+        .header("Referer", format!("{OPENCODE_BASE_URL}/"))
+        .header(
+            "Accept",
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        )
+        .send()
+        .await
+        .ok()?;
+    if !page.status().is_success() {
+        return None;
+    }
+    let text = page.text().await.ok()?;
+    if text.len() > 10_000_000 {
+        return None;
+    }
+
+    let mut windows = Vec::new();
+    for (key, label, minutes) in [
+        ("rollingUsage", "5h", 300_u64),
+        ("weeklyUsage", "7d", 10_080),
+        ("monthlyUsage", "30d", 43_200),
+    ] {
+        if let Some((percent, reset)) = opencode_block(&text, key) {
+            windows.push(UsageWindow {
+                label: label.to_string(),
+                used_percent: percent.clamp(0.0, 100.0),
+                window_minutes: minutes,
+                resets_at: now() + reset,
+            });
+        }
+    }
+    if windows.is_empty() {
+        return None;
+    }
+    Some(AgentUsage {
+        agent_key: "opencode".to_string(),
+        source: "opencode workspace page".to_string(),
+        windows,
+        read_at: now(),
+    })
+}
+
+/// @notice Reads the usage limits of one agent CLI.
+/// @dev One agent per call on purpose: with a large catalog only a few providers
+/// publish readable limits, so the panel asks for the one the user selected
+/// rather than revealing every agent all the time. Providers that cannot be read
+/// answer `None`, which the panel states plainly rather than guessing.
 /// @param agent_key Agent key from the frontend catalog, e.g. `codex`.
 /// @param credential Session cookie or token for the providers that read a web
 /// session (Minimax, opencode); the file-based providers ignore it.
 /// @return The provider's usage, or None when nothing can be read.
 #[tauri::command]
 pub async fn agent_usage(agent_key: String, credential: Option<String>) -> Option<AgentUsage> {
-    // Read here so the contract is in one place; providers that need it will take
-    // it from this binding rather than each carrying its own argument.
-    let _credential = credential;
     match agent_key.as_str() {
         "codex" => codex_usage(),
         // Claude is asked the way its CLI asks: the usage endpoint first, and the
@@ -820,6 +1125,10 @@ pub async fn agent_usage(agent_key: String, credential: Option<String>) -> Optio
             ..usage
         }),
         "kimi" => kimi_usage().await,
+        // The two web-session providers have nothing to read without the cookie
+        // the user pasted in Settings, so they answer None until one is stored.
+        "minimax" => minimax_usage(credential.as_deref()?).await,
+        "opencode" => opencode_usage(credential.as_deref()?).await,
         _ => None,
     }
 }
