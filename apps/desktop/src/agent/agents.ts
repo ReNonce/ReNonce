@@ -98,7 +98,7 @@ const RESUME_ARGS: Record<string, string> = {
   claude: "--continue",
   codex: "resume --last",
   copilot: "--continue",
-  gemini: "--resume latest",
+  gemini: "--resume",
   grok: "--resume",
   kimi: "--continue",
   opencode: "--continue",

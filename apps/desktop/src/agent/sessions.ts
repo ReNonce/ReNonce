@@ -135,7 +135,8 @@ export function focusAgentSession(session: AgentSession): void {
 const ANSI_PATTERN = /\u001b\[[0-9;?]*[ -/]*[@-~]/g;
 
 /** The line agents print on quit naming the conversation to come back to. */
-const RESUME_HINT = /\b([a-z][\w-]*)\s+(?:--resume|resume)\s+([0-9A-Za-z][0-9A-Za-z-]{7,})/;
+const RESUME_HINT =
+  /\b([a-z][\w-]*)\s+(?:--resume|resume|--session|session)\s+([0-9A-Za-z][0-9A-Za-z-]{7,})/;
 
 /** How much of a terminal's output is kept around to find that hint. */
 const TAIL_LIMIT = 8_000;
@@ -162,10 +163,10 @@ export function captureAgentOutput(terminalId: string, chunk: string): void {
 /**
  * @notice Reads the resume command a CLI printed before it quit.
  * @dev Agents name the exact conversation to come back to on their last line —
- * `grok --resume 01a0…`, `codex resume 5b1c…` — and that id is worth keeping:
- * the folder's most recent conversation is not always the one that was open. The
- * arguments are taken from the printed line while the command itself comes from
- * the catalog, so a path or wrapper in the output cannot leak into the launch.
+ * `grok --resume 01a0…`, `codex resume 5b1c…`, `opencode --session 7f2a…` — and
+ * that id is worth keeping: the folder's most recent conversation is not always
+ * the one that was open. The last matching line wins, and a line that names some
+ * other program is ignored, so only our own launcher can come back out.
  * @param terminalId Terminal that exited.
  * @param agentKey Catalog key of the agent that ran.
  * @return The command to run again, or null when nothing was printed.
@@ -173,13 +174,20 @@ export function captureAgentOutput(terminalId: string, chunk: string): void {
 function takeResumeCommand(terminalId: string, agentKey: string): string | null {
   const tail = outputTails.get(terminalId) ?? "";
   outputTails.delete(terminalId);
-  const match = RESUME_HINT.exec(tail);
-  if (match === null) {
+  const agent = agentByKey(agentKey);
+  if (agent === undefined) {
     return null;
   }
-  const agent = agentByKey(agentKey);
-  const command = agent === undefined ? match[1] : agent.command;
-  return `${command}${match[0].slice(match[1].length)}`;
+  // Only a line that names the CLI we launched counts: prose such as "the session
+  // 8f3c…" would otherwise be read as a launch command.
+  const pattern = new RegExp(RESUME_HINT.source, "g");
+  let found: string | null = null;
+  for (let match = pattern.exec(tail); match !== null; match = pattern.exec(tail)) {
+    if (match[1] === agent.command) {
+      found = `${agent.command}${match[0].slice(match[1].length)}`;
+    }
+  }
+  return found;
 }
 
 /**
