@@ -72,6 +72,25 @@
   appearance: none;
 }
 
+.palette-shell__refresh {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin-left: 2px;
+  border: 0;
+  border-radius: calc(var(--radius) - 6px);
+  background: transparent;
+  color: var(--muted-foreground);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.palette-shell__refresh:hover {
+  color: var(--sidebar-foreground);
+}
+
 .palette-shell__add {
   display: grid;
   place-items: center;

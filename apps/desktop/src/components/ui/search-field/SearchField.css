@@ -7,6 +7,9 @@
  */
 
 .search-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 6px 8px;
 }
 
@@ -67,4 +70,22 @@
   color: var(--muted-foreground);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
+}
+
+.search-field__refresh {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--sidebar-border);
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.search-field__refresh:hover {
+  border-color: var(--sidebar-ring);
+  color: var(--sidebar-foreground);
 }

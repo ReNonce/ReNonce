@@ -108,6 +108,13 @@ export function AgentUsageBar() {
         <PaletteShell
           label="Agent usage limits"
           placeholder="Search agents"
+          onRefresh={() => {
+            // By hand, now: the list also refreshes when it opens and on a slow
+            // interval, but a fresh read right after signing in should not wait.
+            setLoaded(false);
+            load();
+          }}
+          refreshLabel="Refresh usage limits"
           query={query}
           onQueryChange={setQuery}
           onSearchKeyDown={onSearchKeyDown}

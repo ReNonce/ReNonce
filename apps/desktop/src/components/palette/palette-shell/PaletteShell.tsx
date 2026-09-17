@@ -5,6 +5,7 @@
  * @dev Hosts own their items and selection, so the shell only renders the
  * sections it is given and forwards what the search field receives.
  */
+import { ArrowsClockwise } from "@phosphor-icons/react";
 import { useEffect, useRef } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { MaskIcon } from "../../icons/mask-icon/MaskIcon";
@@ -27,6 +28,10 @@ export interface PaletteShellProps {
   addExpanded?: boolean;
   /** Accessible name and tooltip of the add button. */
   addLabel?: string;
+  /** Renders a refresh control beside the search field when provided. */
+  onRefresh?: () => void;
+  /** Accessible name and tooltip of that control. */
+  refreshLabel?: string;
   /** Forwarded keys from the search field (arrows, Enter, digits). */
   onSearchKeyDown?: (event: ReactKeyboardEvent<HTMLInputElement>) => void;
   /** Sections and forms rendered inside the panel. */
@@ -43,6 +48,8 @@ export function PaletteShell({
   addExpanded = false,
   addLabel = "New",
   onSearchKeyDown,
+  onRefresh,
+  refreshLabel = "Refresh",
   children,
 }: PaletteShellProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -85,6 +92,17 @@ export function PaletteShell({
             onChange={(event) => onQueryChange(event.target.value)}
             onKeyDown={onSearchKeyDown}
           />
+          {onRefresh !== undefined && (
+            <button
+              type="button"
+              className="palette-shell__refresh"
+              aria-label={refreshLabel}
+              title={refreshLabel}
+              onClick={onRefresh}
+            >
+              <ArrowsClockwise size={14} />
+            </button>
+          )}
           {onAdd !== undefined && (
             <button
               type="button"

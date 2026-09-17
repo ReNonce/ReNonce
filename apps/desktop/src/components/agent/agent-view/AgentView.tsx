@@ -151,6 +151,12 @@ export function AgentView() {
         <PaletteShell
           label="New agent session"
           placeholder="Search agents"
+          onRefresh={() => {
+            // The picker only offers CLIs this machine has, so a refresh
+            // re-checks that instead of re-reading a list from cache.
+            installedAgents().then(setCatalog).catch(() => undefined);
+          }}
+          refreshLabel="Refresh installed agents"
           query={pickerQuery}
           onQueryChange={setPickerQuery}
           onSearchKeyDown={onPickerKeyDown}

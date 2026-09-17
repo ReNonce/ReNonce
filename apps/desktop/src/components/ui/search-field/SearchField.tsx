@@ -6,6 +6,7 @@
  * hint is read from the keymap store by action id, so rebinding updates it
  * everywhere the field is used.
  */
+import { ArrowsClockwise } from "@phosphor-icons/react";
 import { useKeymap } from "../../../keymap/keymap";
 import { MaskIcon } from "../../icons/mask-icon/MaskIcon";
 import "./SearchField.css";
@@ -21,6 +22,10 @@ export interface SearchFieldProps {
   binding?: string;
   /** Renders the field disabled (nothing to search yet). */
   disabled?: boolean;
+  /** Renders a refresh control beside the field when provided. */
+  onRefresh?: () => void;
+  /** Accessible name and tooltip of that control. */
+  refreshLabel?: string;
 }
 
 export function SearchField({
@@ -29,6 +34,8 @@ export function SearchField({
   label,
   binding,
   disabled = false,
+  onRefresh,
+  refreshLabel = "Refresh",
 }: SearchFieldProps) {
   const bindings = useKeymap();
   const shortcut = binding === undefined ? undefined : bindings[binding];
@@ -55,6 +62,17 @@ export function SearchField({
           </span>
         )}
       </div>
+      {onRefresh !== undefined && (
+        <button
+          type="button"
+          className="search-field__refresh"
+          aria-label={refreshLabel}
+          title={refreshLabel}
+          onClick={onRefresh}
+        >
+          <ArrowsClockwise size={14} />
+        </button>
+      )}
     </div>
   );
 }
