@@ -1,24 +1,44 @@
 # ReNonce
 
-ReNonce is a planned AI audit platform, shipped as a desktop app.
-This repository currently holds the empty Tauri + React scaffold — no audit
-features or custom UI yet.
+ReNonce is a desktop workspace for code and AI agents: a VS Code-shaped shell for
+reading and editing a project, driving git, and running the coding-agent CLIs
+already installed on the machine.
+
+## Features
+
+| Area | What it does |
+|---|---|
+| **Editor** | CodeMirror 6 surface with syntax highlighting (JS/JSX/TS/TSX, JSON, Markdown, Rust, Python), line gutter, selection, and Ctrl/Cmd+S saving. Markdown files switch between code and rendered preview. |
+| **Files** | File tree with its own search, context menu (new file/folder, rename, delete, reveal), and a folder breadcrumb in the bottom bar that shows the 3 deepest levels plus `…` and `+` to move up and down. |
+| **Git history** | Left panel replaces the explorer with the commit history, grouped under day headings with author avatar, name and commit message. Selecting a commit opens its patch in the center. |
+| **Git commit / push** | Opposite panel for staging and committing: tracked/untracked list, commit message that grows and expands, pinned compose, and a Push mode listing what has not been pushed yet. |
+| **Git operations** | Fetch, Fetch from, Pull, Pull (rebase), Push, Push to, Force push (always `--force-with-lease`), remotes, branch switching, and one of Amend / Sign off / Skip hooks. |
+| **Diff viewer** | Patch in the center with a single editor-style line-number gutter and a collapse chevron per file, animated like the sidebar. |
+| **Agents** | New session picker over the CLIs this machine actually has, terminal launched straight into the agent, a session row per run, inline rename, and a right-click menu (rename, close, close others, close all). A terminal closes itself when its CLI exits and the row goes with it. |
+| **Agent usage** | One button reveals each agent's account limits, read from that provider's own source (local files, OAuth usage endpoint, CLI statusline mirror, or console API). Values that cannot be read are not shown. |
+| **Credential settings** | Providers whose limits live behind a web session (MiniMax, opencode) take a pasted cookie in Settings, stored on this machine only. |
+| **Terminal** | Tabs with a right-click menu (close, close others, close all), shell picker, theme-aware ANSI palette, and PTY session lifecycle. |
+| **Themes** | 15 built-in themes (catppuccin, dracula, gruvbox, nord, rose-pine, solarized, tokyo-night, xcode and more) with light/dark/system modes. |
+| **Keymap** | Every shortcut is a rebindable action, shown inline in search fields. |
+| **Layout** | Three-column workspace (sidebar, center tabs, view switcher), collapsible panels with a shared collapse animation, and full-width settings screens. |
 
 ## Tech stack
 
 - [Tauri 2](https://tauri.app/) — desktop shell (Rust backend + web frontend)
 - [React 19](https://react.dev/) + TypeScript + [Vite](https://vite.dev/) frontend
-- Rust backend with `tauri-plugin-shell` initialized sidecar-ready (no binaries yet)
+- CodeMirror 6 (editor) and xterm.js (terminal) on the frontend
+- Rust backend: PTY sessions, git plumbing, and provider usage readers
 - npm + Cargo for package management
 
 App identity: `productName "ReNonce"`, identifier `com.renonce.app`.
 
 ## Prerequisites
 
-- Node.js v22 (`nvm use`) + npm
+- Node.js v22 or newer + npm
 - Rust + Cargo
 - Tauri system dependencies for Linux (webkit2gtk et al. — see the
   [Tauri prerequisites guide](https://tauri.app/start/prerequisites/))
+- Git on `PATH` for the git panels
 
 ## Getting started
 
@@ -57,21 +77,36 @@ Regenerate the OS app icons from the brand master:
 ./node_modules/.bin/tauri icon public/assets/brand/ReNonce-Icon-1024x1024/ReNonce-Icon-1024x1024-1x.png
 ```
 
+## Agent CLIs
+
+The New session picker lists a CLI only when it is installed, and the usage reader
+lists a provider only when its limits can actually be read. Agents the app knows
+about: Claude Code, Codex CLI, Gemini CLI, Grok CLI, opencode, Copilot CLI, Kimi
+Code, MiniMax Code (`mcode`), Antigravity (`agy`), Crush, Command Code, and
+Hermes. Adding another is one entry in
+`apps/desktop/src/agent/agents.ts` plus a usage reader on the Rust side.
+
 ## Project structure
 
 ```
 renonce/
 ├── apps/
 │   └── desktop/              # Tauri desktop app (all commands run here)
-│   │   ├── index.html        # blank shell, React mounts into #root
-│   │   ├── vite.config.ts    # React plugin + Tauri dev server (port 1420)
-│   │   ├── src/              # React frontend (main.tsx, blank App.tsx, App.css)
-│   │   ├── public/assets/  # brand/ + themes/icons/fonts/sounds (see its README)
-│   │   └── src-tauri/        # Rust backend + config
-│   │       ├── tauri.conf.json   # borderless window (decorations: false)
-│   │       ├── capabilities/ # (no shell scopes yet)
-│   │       └── icons/        # generated OS icons (do not hand-edit)
-├── .github/                  # CI workflow, issue templates, PR template
+│       ├── index.html        # shell React mounts into #root
+│       ├── vite.config.ts    # React plugin + Tauri dev server
+│       ├── public/assets/    # brand/, themes/, icons/, fonts/, sounds/
+│       ├── src/              # React frontend
+│       │   ├── agent/        # agent catalogue, sessions, usage client
+│       │   ├── components/   # layout, editor, git, terminal, agent, settings, ui
+│       │   ├── files/        # path helpers
+│       │   ├── git/          # frontend git client
+│       │   ├── keymap/       # rebindable actions
+│       │   ├── terminal/     # tab model
+│       │   └── workspace/    # open folder state
+│       └── src-tauri/        # Rust backend
+│           ├── src/          # pty.rs, git.rs, usage.rs, fs commands
+│           ├── tauri.conf.json
+│           └── icons/        # generated OS icons (do not hand-edit)
 ├── script/                   # dev/build/check/install/icons/clean wrappers
 ├── README.md
 └── AGENT.md                  # contributor guide for AI agents
