@@ -1,7 +1,7 @@
 /**
  * @title Agent view styles
- * @notice Mirrors the Files panel: a sticky search-and-heading block on the
- * sidebar surface, with the body scrolling underneath.
+ * @notice Mirrors the Files panel: a sticky search / action / heading block on
+ * the sidebar surface, with the session list scrolling underneath.
  */
 
 .agent-view {
@@ -17,10 +17,49 @@
   background: var(--sidebar);
 }
 
+.agent-view__actions {
+  padding: 0 8px 4px;
+}
+
+.agent-view__new {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 26px;
+  border: 1px solid var(--sidebar-border);
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--sidebar-foreground);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.agent-view__new:hover:not(:disabled) {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+.agent-view__new:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.agent-view__new:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
 .agent-view__heading-row {
   display: flex;
   align-items: center;
   padding: 0 10px 4px;
+}
+
+.agent-view__list {
+  padding: 2px 6px 8px;
 }
 
 .agent-view__placeholder {

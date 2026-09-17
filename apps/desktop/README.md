@@ -100,8 +100,13 @@ desktop/
   right-click menu adds the folder actions plus `Close Folder Level`.
 - Views: the left panel switches between Files and Agent. Both open with the
   shared `ui/search-field` and `ui/section-heading` primitives, so their search
-  rows and section labels are identical by construction; the Agent body still
-  reports that the view is coming soon.
+  rows and section labels are identical by construction. Agent adds a **New
+  session** button: it picks from the local catalog in `src/agent/agents.ts`
+  (Claude Code, Codex CLI, Gemini CLI, Grok CLI, opencode, Copilot CLI) and opens
+  a terminal that launches that CLI, so the run starts in one gesture. Sessions
+  are listed under the section heading — selecting one brings its terminal back
+  and moves the workspace to the session's folder — and closing the terminal
+  drops its row.
 - Terminal: the center panel runs xterm.js against a Rust PTY
   (`src-tauri/src/pty.rs`, `portable-pty`). The shell starts in the open folder
   (Unix `$SHELL`; Windows `pwsh` → `powershell` → `cmd`), output streams over a

@@ -14,6 +14,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 import type { TerminalSession } from "../../../terminal/sessions";
+import { takeInitialCommand } from "../../../terminal/sessions";
 import type { TerminalColors, ThemeColors } from "../../../theme/types";
 import { useTheme } from "../../../theme/useTheme";
 import "./TerminalSurface.css";
@@ -172,10 +173,19 @@ export function TerminalSurface({ session, active }: TerminalSurfaceProps) {
       cols: term.cols,
       rows: term.rows,
       onEvent: channel,
-    }).catch((cause: unknown) => {
-      const message = cause instanceof Error ? cause.message : String(cause);
-      term.write(`\r\n\x1b[31m[renonce] ${message}\x1b[0m\r\n`);
-    });
+    })
+      .then(() => {
+        // A session can be born with a launcher to run — an agent CLI, for one.
+        const command = takeInitialCommand(id);
+        if (command !== null) {
+          return invoke("pty_write", { id, data: `${command}\n` });
+        }
+        return undefined;
+      })
+      .catch((cause: unknown) => {
+        const message = cause instanceof Error ? cause.message : String(cause);
+        term.write(`\r\n\x1b[31m[renonce] ${message}\x1b[0m\r\n`);
+      });
 
     const dataDisposable = term.onData((data) => {
       void invoke("pty_write", { id, data }).catch(() => {

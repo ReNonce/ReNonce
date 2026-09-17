@@ -34,6 +34,8 @@ export interface TerminalSession {
   mode: TabMode;
   /** Diff tabs only: full commit hash. */
   commit: string | null;
+  /** Terminal tabs only: command typed once the PTY is listening. */
+  initialCommand: string | null;
 }
 
 /** Which view an editor tab shows. */
@@ -63,7 +65,11 @@ function defaultLabel(session: TerminalSession): string {
 
 let counter = 0;
 
-function createSession(cwd: string | null, shell: string | null): TerminalSession {
+function createSession(
+  cwd: string | null,
+  shell: string | null,
+  initialCommand: string | null,
+): TerminalSession {
   counter += 1;
   const session: TerminalSession = {
     id: `terminal-${Date.now()}-${counter}`,
@@ -74,6 +80,7 @@ function createSession(cwd: string | null, shell: string | null): TerminalSessio
     path: null,
     mode: "code",
     commit: null,
+    initialCommand,
   };
   return { ...session, label: defaultLabel(session) };
 }
@@ -128,14 +135,40 @@ export function useActiveTerminalId(): string {
  * @notice Opens a session in the given folder and activates it.
  * @param cwd Folder for the new shell, or null for the process default.
  * @param shell Shell picked in the + menu, or null for the platform default.
+ * @param initialCommand Command typed into the shell once it is listening, used
+ * to launch an agent CLI in a fresh session.
  * @return The new session id.
  */
-export function openTerminal(cwd: string | null, shell: string | null = null): string {
-  const session = createSession(cwd, shell);
+export function openTerminal(
+  cwd: string | null,
+  shell: string | null = null,
+  initialCommand: string | null = null,
+): string {
+  const session = createSession(cwd, shell, initialCommand);
   sessions = [...sessions, session];
   activeId = session.id;
   notify();
   return session.id;
+}
+
+/**
+ * @notice Reads and clears a session's startup command.
+ * @dev The terminal surface calls this right after the PTY opens, so a launcher
+ * runs exactly once and only when the shell can actually receive it.
+ * @param id Session id; unknown ids yield null.
+ * @return The command to type, or null when there is nothing left to run.
+ */
+export function takeInitialCommand(id: string): string | null {
+  const session = sessions.find((candidate) => candidate.id === id);
+  if (session === undefined || session.initialCommand === null) {
+    return null;
+  }
+  const command = session.initialCommand;
+  sessions = sessions.map((candidate) =>
+    candidate.id === id ? { ...candidate, initialCommand: null } : candidate,
+  );
+  notify();
+  return command;
 }
 
 /**
@@ -224,6 +257,7 @@ export function openFileTab(path: string, mode: TabMode = "code"): string {
     path,
     mode,
     commit: null,
+    initialCommand: null,
   };
   sessions = [...sessions, session];
   activeId = session.id;
@@ -256,6 +290,7 @@ export function openCommitDiffTab(root: string, commit: string): string {
     path: root,
     mode: "code",
     commit,
+    initialCommand: null,
   };
   sessions = [...sessions, session];
   activeId = session.id;
