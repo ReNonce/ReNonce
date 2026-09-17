@@ -7,6 +7,7 @@
 //! queried with the token the CLI stored, exactly as the CLI does. Nothing here
 //! spends quota: only billing and quota reads, never a completion.
 
+use std::cmp::Reverse;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -65,7 +66,7 @@ fn home_dir() -> Option<PathBuf> {
 fn recent_files(dir: &Path, depth: usize) -> Vec<(SystemTime, PathBuf)> {
     let mut found = Vec::new();
     collect_files(dir, depth, &mut found);
-    found.sort_by(|left, right| right.0.cmp(&left.0));
+    found.sort_by_key(|entry| Reverse(entry.0));
     found
 }
 
@@ -132,10 +133,10 @@ fn balanced_object(text: &str) -> Option<&str> {
 
 /// Window label: `5h` for 300 minutes, `7d` for a weekly window.
 fn window_label(minutes: u64) -> String {
-    if minutes >= 1440 && minutes % 1440 == 0 {
+    if minutes >= 1440 && minutes.is_multiple_of(1440) {
         return format!("{}d", minutes / 1440);
     }
-    if minutes >= 60 && minutes % 60 == 0 {
+    if minutes >= 60 && minutes.is_multiple_of(60) {
         return format!("{}h", minutes / 60);
     }
     format!("{minutes}m")
