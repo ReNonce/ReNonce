@@ -795,9 +795,14 @@ async fn kimi_usage() -> Option<AgentUsage> {
 /// every agent all the time. Providers that cannot be read answer `None`, which
 /// the panel states plainly rather than guessing.
 /// @param agent_key Agent key from the frontend catalog, e.g. `codex`.
+/// @param credential Session cookie or token for the providers that read a web
+/// session (Minimax, opencode); the file-based providers ignore it.
 /// @return The provider's usage, or None when nothing can be read.
 #[tauri::command]
-pub async fn agent_usage(agent_key: String) -> Option<AgentUsage> {
+pub async fn agent_usage(agent_key: String, credential: Option<String>) -> Option<AgentUsage> {
+    // Read here so the contract is in one place; providers that need it will take
+    // it from this binding rather than each carrying its own argument.
+    let _credential = credential;
     match agent_key.as_str() {
         "codex" => codex_usage(),
         // Claude is asked the way its CLI asks: the usage endpoint first, and the
