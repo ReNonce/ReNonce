@@ -98,6 +98,10 @@ desktop/
   (`…` lists the hidden ones), clicking a level opens it as the workspace, the
   trailing `+` steps into a folder inside the current one, and a level's
   right-click menu adds the folder actions plus `Close Folder Level`.
+- Views: the left panel switches between Files and Agent. Both open with the
+  shared `ui/search-field` and `ui/section-heading` primitives, so their search
+  rows and section labels are identical by construction; the Agent body still
+  reports that the view is coming soon.
 - Terminal: the center panel runs xterm.js against a Rust PTY
   (`src-tauri/src/pty.rs`, `portable-pty`). The shell starts in the open folder
   (Unix `$SHELL`; Windows `pwsh` → `powershell` → `cmd`), output streams over a
