@@ -123,26 +123,27 @@ export function focusAgentSession(session: AgentSession): void {
 }
 
 /**
- * @notice Marks the session behind a terminal as no longer running.
- * @dev Called when a terminal's process exits. The tab is closed — a CLI that
- * quit should not leave a dead terminal behind — while the row stays, so the
- * agent can be launched again from the panel. Only sessions this layer owns are
+ * @notice Drops the session behind a terminal that has stopped.
+ * @dev Called when a terminal's process exits. The tab is closed — a CLI that quit
+ * should not leave a dead terminal behind — and the row goes with it, so the panel
+ * only ever lists runs that are actually alive. Only sessions this layer owns are
  * touched, so a plain shell terminal keeps the behaviour it had.
  * @param terminalId Terminal whose process exited.
- * @return True when an agent session was marked dormant.
+ * @return True when an agent session was removed.
  */
 export function notifyAgentExit(terminalId: string): boolean {
   const session = sessions.find((candidate) => candidate.terminalId === terminalId);
-  if (session !== undefined) {
-    sessions = sessions.map((candidate) =>
-      candidate.id === session.id ? { ...candidate, terminalId: "" } : candidate,
-    );
+  if (session === undefined) {
+    // No row owns this terminal — it may already have been closed. The tab still
+    // goes, because the caller only reports an exit for an agent-launched tab.
+    closeTerminal(terminalId);
+    notify();
+    return false;
   }
-  // Closing is unconditional: the caller only reports an exit for a tab it knows
-  // was launched as an agent, so the tab always goes even if no row claims it.
+  sessions = sessions.filter((candidate) => candidate.id !== session.id);
   closeTerminal(terminalId);
   notify();
-  return session !== undefined;
+  return true;
 }
 
 /**
@@ -157,5 +158,48 @@ export function closeAgentSession(session: AgentSession): void {
     closeTerminal(session.terminalId);
   }
   sessions = sessions.filter((candidate) => candidate.id !== session.id);
+  notify();
+}
+
+/**
+ * @notice Renames a run, so several of them in one folder stay tellable apart.
+ * @param session Session to rename.
+ * @param label New label; a blank one leaves the label as it was.
+ */
+export function renameAgentSession(session: AgentSession, label: string): void {
+  const trimmed = label.trim();
+  if (trimmed === "") {
+    return;
+  }
+  sessions = sessions.map((candidate) =>
+    candidate.id === session.id ? { ...candidate, label: trimmed } : candidate,
+  );
+  notify();
+}
+
+/**
+ * @notice Ends every run.
+ */
+export function closeAllAgentSessions(): void {
+  for (const session of sessions) {
+    if (session.terminalId !== "") {
+      closeTerminal(session.terminalId);
+    }
+  }
+  sessions = [];
+  notify();
+}
+
+/**
+ * @notice Ends every run except one.
+ * @param keep Session to leave running.
+ */
+export function closeOtherAgentSessions(keep: AgentSession): void {
+  for (const session of sessions) {
+    if (session.id !== keep.id && session.terminalId !== "") {
+      closeTerminal(session.terminalId);
+    }
+  }
+  sessions = sessions.filter((candidate) => candidate.id === keep.id);
   notify();
 }

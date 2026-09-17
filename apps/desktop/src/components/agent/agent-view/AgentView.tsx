@@ -14,11 +14,15 @@ import { AGENT_CLIS, installedAgents } from "../../../agent/agents";
 import type { AgentCli } from "../../../agent/agents";
 import {
   closeAgentSession,
+  closeAllAgentSessions,
+  closeOtherAgentSessions,
   focusAgentSession,
   openAgentSession,
+  renameAgentSession,
   useAgentSessions,
 } from "../../../agent/sessions";
-import { folderName } from "../../../files/path";
+import type { AgentSession } from "../../../agent/sessions";
+import { ContextMenu } from "../../ui/context-menu/ContextMenu";
 import { useActiveTabId } from "../../../terminal/sessions";
 import { useWorkspace } from "../../../workspace/workspace";
 import { MaskIcon } from "../../icons/mask-icon/MaskIcon";
@@ -34,6 +38,10 @@ export function AgentView() {
   const sessions = useAgentSessions();
   const activeTabId = useActiveTabId();
   const [query, setQuery] = useState("");
+  // Right-click target: the run a context menu was opened on, at the pointer.
+  const [menu, setMenu] = useState<{ x: number; y: number; session: AgentSession } | null>(
+    null,
+  );
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerQuery, setPickerQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -132,19 +140,61 @@ export function AgentView() {
           </p>
         )}
         {visible.map((session) => (
-          <CommandRow
+          <div
             key={session.id}
-            icon={<MaskIcon src={session.iconSrc} />}
-            label={session.label}
-            hint={session.cwd === null ? undefined : folderName(session.cwd)}
-            active={session.terminalId !== "" && session.terminalId === activeTabId}
-            dormant={session.terminalId === ""}
-            onSelect={() => focusAgentSession(session)}
-            onRemove={() => closeAgentSession(session)}
-            removeLabel={`Close ${session.label} session`}
-          />
+            className="agent-view__row"
+            onContextMenu={(event) => {
+              event.preventDefault();
+              setMenu({ x: event.clientX, y: event.clientY, session });
+            }}
+          >
+            <CommandRow
+              icon={<MaskIcon src={session.iconSrc} />}
+              label={session.label}
+              active={session.terminalId !== "" && session.terminalId === activeTabId}
+              onSelect={() => focusAgentSession(session)}
+              onRemove={() => closeAgentSession(session)}
+              removeLabel={`Close ${session.label} session`}
+            />
+          </div>
         ))}
       </div>
+
+      {menu !== null && (
+        <ContextMenu
+          x={menu.x}
+          y={menu.y}
+          items={[
+            {
+              id: "rename",
+              label: "Rename",
+              onSelect: () => {
+                const next = window.prompt("Rename session", menu.session.label);
+                if (next !== null) {
+                  renameAgentSession(menu.session, next);
+                }
+              },
+            },
+            {
+              id: "close",
+              label: "Close",
+              onSelect: () => closeAgentSession(menu.session),
+            },
+            {
+              id: "close-others",
+              label: "Close others",
+              separatorBefore: true,
+              onSelect: () => closeOtherAgentSessions(menu.session),
+            },
+            {
+              id: "close-all",
+              label: "Close all",
+              onSelect: () => closeAllAgentSessions(),
+            },
+          ]}
+          onClose={() => setMenu(null)}
+        />
+      )}
 
       {pickerOpen && (
         <PaletteShell
