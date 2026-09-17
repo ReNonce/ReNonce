@@ -105,7 +105,51 @@ const RESUME_ARGS: Record<string, string> = {
 };
 
 /**
+ * Flag that pins a brand-new conversation to an id we choose.
+ * @dev Only these CLIs accept one at launch (`--session-id <uuid>`), and pinning
+ * it is what makes a row come back to its own conversation instead of whichever
+ * one happens to be the folder's most recent.
+ */
+const SESSION_ID_FLAG: Record<string, string> = {
+  claude: "--session-id",
+  copilot: "--session-id",
+  gemini: "--session-id",
+  grok: "--session-id",
+};
+
+/** How a CLI is asked to open one exact conversation. */
+const RESUME_WITH_ID: Record<string, string> = {
+  claude: "--resume",
+  codex: "resume",
+  copilot: "--resume",
+  gemini: "--resume",
+  grok: "--resume",
+  kimi: "--session",
+  opencode: "--session",
+};
+
+/**
+ * @notice Flag that accepts a session id at launch.
+ * @param key Catalog key of the agent.
+ * @return The flag, or null when the CLI cannot be pinned.
+ */
+export function sessionIdFlagFor(key: string): string | null {
+  return SESSION_ID_FLAG[key] ?? null;
+}
+
+/**
+ * @notice How a CLI reopens an exact conversation.
+ * @param key Catalog key of the agent.
+ * @return The command part to put before the id, or null when it cannot.
+ */
+export function resumeWithIdFor(key: string): string | null {
+  return RESUME_WITH_ID[key] ?? null;
+}
+
+/**
  * @notice Arguments that resume an agent's last session.
+ * @dev The fallback for CLIs whose id we could not learn: it picks the folder's
+ * most recent conversation, which is why pinning an id is preferred.
  * @param key Catalog key of the agent.
  * @return The argument string, or null when the CLI cannot resume.
  */

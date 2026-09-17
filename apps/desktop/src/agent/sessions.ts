@@ -15,7 +15,7 @@ import {
   setActiveTerminal,
 } from "../terminal/sessions";
 import { setWorkspaceRoot } from "../workspace/workspace";
-import { agentByKey, resumeArgsFor } from "./agents";
+import { agentByKey, resumeArgsFor, resumeWithIdFor, sessionIdFlagFor } from "./agents";
 import type { AgentCli } from "./agents";
 
 export interface AgentSession {
@@ -33,6 +33,8 @@ export interface AgentSession {
   terminalId: string;
   /** Exact command the CLI printed to come back to this conversation. */
   resumeCommand: string | null;
+  /** Id pinned for this conversation, when the CLI let us choose one. */
+  sessionId: string | null;
 }
 
 let sessions: AgentSession[] = [];
@@ -76,8 +78,16 @@ export function getAgentSessions(): AgentSession[] {
 export function openAgentSession(agent: AgentCli, cwd: string | null): AgentSession {
   counter += 1;
   // `exec` makes the CLI the terminal's process rather than a job inside a shell,
-  // so quitting it ends the PTY — which is what tells us the run has stopped.
-  const terminalId = openTerminal(cwd, null, `exec ${agent.command}`, true);
+  // so quitting it ends the PTY — which is what tells us the run has stopped. The
+  // id is pinned when the CLI takes one, so this row can come back to this exact
+  // conversation even with several of them open in the same folder.
+  const flag = sessionIdFlagFor(agent.key);
+  const sessionId = flag === null ? null : crypto.randomUUID();
+  const launch =
+    flag === null || sessionId === null
+      ? `exec ${agent.command}`
+      : `exec ${agent.command} ${flag} ${sessionId}`;
+  const terminalId = openTerminal(cwd, null, launch, true);
   // The tab is named after the agent, so the strip reads "Codex CLI" rather
   // than the folder the session happens to run in.
   renameSession(terminalId, agent.label);
@@ -89,6 +99,7 @@ export function openAgentSession(agent: AgentCli, cwd: string | null): AgentSess
     cwd,
     terminalId,
     resumeCommand: null,
+    sessionId,
   };
   sessions = [...sessions, session];
   notify();
@@ -115,7 +126,16 @@ export function focusAgentSession(session: AgentSession): void {
     return;
   }
   counter += 1;
+  // A pinned id is the point of the row: reopening that conversation, not the
+  // folder's most recent one. Only when there is none does it fall back to the
+  // command the CLI printed, and last to the CLI's own "latest" flag.
+  const openWith = resumeWithIdFor(agent.key);
+  const pinned =
+    session.sessionId !== null && openWith !== null
+      ? `${agent.command} ${openWith} ${session.sessionId}`
+      : null;
   const resume =
+    pinned ??
     session.resumeCommand ??
     (() => {
       const args = resumeArgsFor(agent.key);
