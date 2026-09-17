@@ -15,7 +15,7 @@ import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 import type { TerminalSession } from "../../../terminal/sessions";
 import { takeInitialCommand } from "../../../terminal/sessions";
-import { captureAgentOutput, notifyAgentExit } from "../../../agent/sessions";
+import { notifyAgentExit } from "../../../agent/sessions";
 import type { TerminalColors, ThemeColors } from "../../../theme/types";
 import { useTheme } from "../../../theme/useTheme";
 import "./TerminalSurface.css";
@@ -159,11 +159,7 @@ export function TerminalSurface({ session, active }: TerminalSurfaceProps) {
     const channel = new Channel<PtyEvent>();
     channel.onmessage = (event) => {
       if (event.kind === "data" && event.data !== undefined) {
-        const chunk = decodeBase64(event.data);
-        term.write(chunk);
-        // Agents name the conversation to resume on their last line; keeping the
-        // tail is what lets the session row come back to that exact one.
-        captureAgentOutput(id, new TextDecoder().decode(chunk));
+        term.write(decodeBase64(event.data));
       } else if (event.kind === "exit") {
         // An agent CLI is the tab's own process, so its exit closes the tab and
         // leaves the session row behind to be resumed. A plain shell keeps the
