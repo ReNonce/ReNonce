@@ -7,6 +7,7 @@
  * selected view is shared through the `view/main-view` store, so the keymap
  * listener can switch it too.
  */
+import { AgentView } from "../../../agent/agent-view/AgentView";
 import { FileExplorer } from "../../../files/file-explorer/FileExplorer";
 import { MaskIcon } from "../../../icons/mask-icon/MaskIcon";
 import { MAIN_VIEW_ITEMS, setMainView, useMainView } from "../../../../view/main-view";
@@ -45,11 +46,7 @@ export function LeftLayout({ width }: LeftLayoutProps) {
         />
       </PanelHeader>
       <div className="left-layout__content">
-        {mainView === "files" ? (
-          <FileExplorer />
-        ) : (
-          <p className="left-layout__placeholder">Agent view coming soon.</p>
-        )}
+        {mainView === "files" ? <FileExplorer /> : <AgentView />}
       </div>
     </aside>
   );

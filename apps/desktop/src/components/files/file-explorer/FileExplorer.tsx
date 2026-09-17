@@ -39,7 +39,8 @@ import { GitHistoryView } from "../../git/git-history/GitHistoryView";
 import { ContextMenu } from "../../ui/context-menu/ContextMenu";
 import type { ContextMenuItem } from "../../ui/context-menu/ContextMenu";
 import { Chevron } from "../../ui/chevron/Chevron";
-import { FileSearch } from "../file-search/FileSearch";
+import { SearchField } from "../../ui/search-field/SearchField";
+import { SectionHeading } from "../../ui/section-heading/SectionHeading";
 import "./FileExplorer.css";
 
 /** Path shown relative to the workspace root, for search results. */
@@ -621,7 +622,7 @@ export function FileExplorer() {
     // Nothing open yet: the field stays, disabled, so the panel is not blank.
     return (
       <div className="file-explorer">
-        <FileSearch value={query} onChange={setQuery} disabled />
+        <SearchField value={query} onChange={setQuery} label="Search files" binding="file.search" disabled />
       </div>
     );
   }
@@ -637,13 +638,10 @@ export function FileExplorer() {
         }}
       >
         <div className="file-explorer__top">
-        <FileSearch value={query} onChange={setQuery} />
+        <SearchField value={query} onChange={setQuery} label="Search files" binding="file.search" />
 
         <div className="file-explorer__actions">
-          <h2 className="file-explorer__heading">
-            Files
-            <span className="file-explorer__divider" aria-hidden="true" />
-          </h2>
+          <SectionHeading label="Files" />
           <button
             type="button"
             className="file-explorer__action"

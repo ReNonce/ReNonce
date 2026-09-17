@@ -1,0 +1,32 @@
+/**
+ * @title Agent view styles
+ * @notice Mirrors the Files panel: a sticky search-and-heading block on the
+ * sidebar surface, with the body scrolling underneath.
+ */
+
+.agent-view {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.agent-view__top {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--sidebar);
+}
+
+.agent-view__heading-row {
+  display: flex;
+  align-items: center;
+  padding: 0 10px 4px;
+}
+
+.agent-view__placeholder {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted-foreground);
+}

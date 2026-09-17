@@ -24,13 +24,19 @@ const HANDLERS: Record<string, () => void> = {
     }
   },
   "file.search": () => {
-    setMainView("files");
-    // The Files panel may mount on this tick, so focus on the next frame.
-    window.requestAnimationFrame(() => {
-      const input = document.querySelector<HTMLInputElement>(".file-search__input");
+    // Every panel search uses the shared field, so focus whatever is on screen;
+    // the Files panel may mount on this tick, hence the next-frame focus.
+    const focusField = () => {
+      const input = document.querySelector<HTMLInputElement>(".search-field__input");
       input?.focus();
       input?.select();
-    });
+    };
+    if (document.querySelector(".search-field__input") !== null) {
+      focusField();
+      return;
+    }
+    setMainView("files");
+    window.requestAnimationFrame(focusField);
   },
   "file.newWindow": openNewWindow,
   "file.closeFolder": closeFolder,

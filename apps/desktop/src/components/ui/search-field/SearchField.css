@@ -1,16 +1,16 @@
 /**
- * @title File search styles
+ * @title Search field styles
  * @notice Input row on the panel surface: a bordered field with the magnifier
  * and the key binding hint inside it.
- * @dev Stickiness lives on the explorer's sticky top block, which this row is
- * part of, so search, quick actions, and the tree scroll independently.
+ * @dev Stickiness belongs to the hosting panel's sticky top block, so the field
+ * can be used by any panel that keeps a header pinned while its list scrolls.
  */
 
-.file-search {
+.search-field {
   padding: 6px 8px;
 }
 
-.file-search__field {
+.search-field__frame {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -24,15 +24,15 @@
   color: var(--sidebar-foreground);
 }
 
-.file-search__field:focus-within {
+.search-field__frame:focus-within {
   border-color: var(--sidebar-ring);
 }
 
-.file-search__field[data-disabled="true"] {
+.search-field__frame[data-disabled="true"] {
   opacity: 0.6;
 }
 
-.file-search__icon {
+.search-field__icon {
   display: grid;
   place-items: center;
   flex: 0 0 auto;
@@ -41,7 +41,7 @@
   color: var(--muted-foreground);
 }
 
-.file-search__input {
+.search-field__input {
   flex: 1 1 auto;
   min-width: 0;
   border: 0;
@@ -53,16 +53,16 @@
   appearance: none;
 }
 
-.file-search__input::placeholder {
+.search-field__input::placeholder {
   color: var(--muted-foreground);
 }
 
-.file-search__input::-webkit-search-decoration,
-.file-search__input::-webkit-search-cancel-button {
+.search-field__input::-webkit-search-decoration,
+.search-field__input::-webkit-search-cancel-button {
   appearance: none;
 }
 
-.file-search__shortcut {
+.search-field__shortcut {
   flex: 0 0 auto;
   color: var(--muted-foreground);
   font-size: 12px;

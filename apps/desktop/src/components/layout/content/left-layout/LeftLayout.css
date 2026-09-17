@@ -25,11 +25,3 @@
 .left-layout__content::-webkit-scrollbar {
   display: none;
 }
-
-.left-layout__placeholder {
-  margin: 0;
-  padding: 8px 10px;
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--muted-foreground);
-}
