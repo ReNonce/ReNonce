@@ -2,51 +2,19 @@
  * @title Editor surface
  * @notice CodeMirror 6 surface: line numbers, selection, and syntax highlighting,
  * themed entirely from the active palette.
- * @dev The highlight style paints with the theme's ANSI CSS variables, so
- * switching themes recolors code without rebuilding the view. The mapping reads
- * like a terminal usually does: keywords magenta, strings green, numbers yellow,
- * comments italic bright-black, types cyan, functions and properties blue.
+ * @dev Colors come from `syntax-style.ts`. The grammar for the file arrives
+ * after the view exists — see `languages.ts` — and is appended to the live
+ * state, so a slow first-time parser never delays showing the file, and a
+ * grammar that cannot be fetched leaves it as plain text.
  */
 import { useEffect, useRef } from "react";
-import { HighlightStyle, StreamLanguage, syntaxHighlighting } from "@codemirror/language";
-import { EditorState } from "@codemirror/state";
+import { syntaxHighlighting } from "@codemirror/language";
+import { EditorState, StateEffect } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
-import { css } from "@codemirror/lang-css";
-import { html } from "@codemirror/lang-html";
-import { javascript } from "@codemirror/lang-javascript";
-import { json } from "@codemirror/lang-json";
-import { markdown } from "@codemirror/lang-markdown";
-import { python } from "@codemirror/lang-python";
-import { rust } from "@codemirror/lang-rust";
-import { sql } from "@codemirror/lang-sql";
-import { xml } from "@codemirror/lang-xml";
-import { yaml } from "@codemirror/lang-yaml";
-import { dockerFile } from "@codemirror/legacy-modes/mode/dockerfile";
-import { diff } from "@codemirror/legacy-modes/mode/diff";
-import { properties } from "@codemirror/legacy-modes/mode/properties";
-import { shell } from "@codemirror/legacy-modes/mode/shell";
-import { toml } from "@codemirror/legacy-modes/mode/toml";
-import { tags as t } from "@lezer/highlight";
-import { solidity } from "@replit/codemirror-lang-solidity";
 import { basicSetup } from "codemirror";
-import type { Extension } from "@codemirror/state";
+import { languageFor } from "./languages";
+import { SYNTAX_STYLE } from "./syntax-style";
 import "./EditorSurface.css";
-
-const SYNTAX_STYLE = HighlightStyle.define([
-  { tag: [t.keyword, t.modifier], color: "var(--ansi-5)" },
-  { tag: [t.string, t.special(t.string), t.regexp], color: "var(--ansi-2)" },
-  { tag: [t.number, t.bool, t.null, t.atom], color: "var(--ansi-3)" },
-  { tag: [t.comment, t.lineComment, t.blockComment], color: "var(--ansi-8)", fontStyle: "italic" },
-  { tag: [t.typeName, t.className, t.namespace], color: "var(--ansi-6)" },
-  { tag: [t.function(t.variableName), t.function(t.propertyName), t.labelName], color: "var(--ansi-4)" },
-  { tag: [t.propertyName, t.attributeName], color: "var(--ansi-4)" },
-  { tag: [t.tagName], color: "var(--ansi-1)" },
-  { tag: [t.operator, t.punctuation, t.separator, t.bracket], color: "var(--ansi-7)" },
-  { tag: [t.heading], color: "var(--ansi-4)", fontWeight: "600" },
-  { tag: [t.strong], fontWeight: "600" },
-  { tag: [t.emphasis], fontStyle: "italic" },
-  { tag: [t.link, t.url], color: "var(--ansi-4)", textDecoration: "underline" },
-]);
 
 const EDITOR_THEME = EditorView.theme({
   "&": {
@@ -82,121 +50,6 @@ const EDITOR_THEME = EditorView.theme({
   },
 });
 
-/**
- * Languages for files recognised by name rather than extension.
- * @dev Dotfiles have no usable extension, and `Dockerfile`/`Containerfile` have
- * none at all. Git-family ignores and editor configs share the `properties`
- * tokenizer, which handles `#` comments plus key/value lines.
- */
-const FILENAME_LANGUAGES: Record<string, () => Extension> = {
-  dockerfile: () => StreamLanguage.define(dockerFile),
-  containerfile: () => StreamLanguage.define(dockerFile),
-  ".gitignore": () => StreamLanguage.define(properties),
-  ".gitattributes": () => StreamLanguage.define(properties),
-  ".gitmodules": () => StreamLanguage.define(properties),
-  ".gitconfig": () => StreamLanguage.define(properties),
-  ".dockerignore": () => StreamLanguage.define(properties),
-  ".npmignore": () => StreamLanguage.define(properties),
-  ".editorconfig": () => StreamLanguage.define(properties),
-};
-
-/** Shell startup files that carry no extension at all. */
-const SHELL_FILENAMES = new Set([
-  ".profile",
-  ".bash_profile",
-  ".bash_login",
-  ".zprofile",
-  ".zlogin",
-]);
-
-/**
- * Language support picked from the file name.
- * @dev Unknown names get no language (plain text). Order matters: exact names
- * first (Dockerfile, .gitignore), then prefixes (`rc` shell files, `.env` and
- * its variants like `.env.local`), then the extension switch. Lock files are
- * TOML in practice (Cargo.lock, poetry.lock) — `package-lock.json` is JSON
- * through its own extension.
- */
-function languageFor(path: string): Extension {
-  const filename = path.split(/[\\/]/).pop()?.toLowerCase() ?? "";
-
-  const byName = FILENAME_LANGUAGES[filename];
-  if (byName !== undefined) {
-    return byName();
-  }
-  if (SHELL_FILENAMES.has(filename) || filename.endsWith("rc")) {
-    return StreamLanguage.define(shell);
-  }
-  if (filename === ".env" || filename.startsWith(".env.")) {
-    return StreamLanguage.define(properties);
-  }
-
-  const extension = filename.includes(".") ? (filename.split(".").pop() ?? "") : "";
-  switch (extension) {
-    case "js":
-    case "jsx":
-    case "mjs":
-    case "cjs":
-      return javascript({ jsx: true });
-    case "ts":
-    case "tsx":
-      return javascript({ typescript: true, jsx: true });
-    case "json":
-    case "jsonc":
-    case "map":
-      return json();
-    case "md":
-    case "markdown":
-    case "mdx":
-      return markdown();
-    case "rs":
-      return rust();
-    case "sol":
-      return solidity;
-    case "abi":
-      return json();
-    case "py":
-      return python();
-    case "html":
-    case "htm":
-    case "vue":
-    case "svelte":
-      return html();
-    case "css":
-    case "scss":
-    case "less":
-      return css();
-    case "yaml":
-    case "yml":
-      return yaml();
-    case "sql":
-      return sql();
-    case "xml":
-    case "svg":
-      return xml();
-    case "sh":
-    case "bash":
-    case "zsh":
-      return StreamLanguage.define(shell);
-    case "toml":
-    case "lock":
-      return StreamLanguage.define(toml);
-    case "ini":
-    case "cfg":
-    case "conf":
-    case "env":
-    case "properties":
-    case "desktop":
-    case "service":
-      return StreamLanguage.define(properties);
-    case "diff":
-    case "patch":
-      return StreamLanguage.define(diff);
-    default:
-      return [];
-  }
-}
-
 export interface EditorSurfaceProps {
   /** Absolute file path; drives the language and the save shortcut. */
   path: string;
@@ -224,7 +77,6 @@ export function EditorSurface({ path, value, onChange, onSave }: EditorSurfacePr
         doc: value,
         extensions: [
           basicSetup,
-          languageFor(path),
           syntaxHighlighting(SYNTAX_STYLE),
           EDITOR_THEME,
           keymap.of([
@@ -245,7 +97,16 @@ export function EditorSurface({ path, value, onChange, onSave }: EditorSurfacePr
         ],
       }),
     });
+    let disposed = false;
+    void languageFor(path)
+      .then((support) => {
+        if (!disposed && support !== null) {
+          view.dispatch({ effects: StateEffect.appendConfig.of(support) });
+        }
+      })
+      .catch(() => undefined);
     return () => {
+      disposed = true;
       view.destroy();
     };
     // Mount-only on purpose: one tab instance owns one file, and the document is

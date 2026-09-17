@@ -8,7 +8,7 @@ already installed on the machine.
 
 | Area | What it does |
 |---|---|
-| **Editor** | CodeMirror 6 surface with syntax highlighting (JS/JSX/TS/TSX, JSON, Markdown, Rust, Python), line gutter, selection, and Ctrl/Cmd+S saving. Markdown files switch between code and rendered preview. |
+| **Editor** | CodeMirror 6 surface with a line gutter, selection, Ctrl/Cmd+S saving, and syntax highlighting for everything CodeMirror ships — JSX/TSX, JSON, Markdown, Rust, Python, Go, Java, PHP, C/C++, C#, Ruby, SQL, YAML, TOML, Dockerfile, shell, dotfiles and lock files, plus community grammars for Svelte, Nix, Terraform, Zig, Elixir, Make and Solidity. Each grammar is fetched only for the file that needs it. Markdown files switch between code and rendered preview, and fences highlight the language they name. |
 | **Files** | File tree with its own search, context menu (new file/folder, rename, delete, reveal), and a folder breadcrumb in the bottom bar that shows the 3 deepest levels plus `…` and `+` to move up and down. |
 | **Git history** | Left panel replaces the explorer with the commit history, grouped under day headings with author avatar, name and commit message. Selecting a commit opens its patch in the center. |
 | **Git commit / push** | Opposite panel for staging and committing: tracked/untracked list, commit message that grows and expands, pinned compose, and a Push mode listing what has not been pushed yet. |

@@ -125,10 +125,16 @@ desktop/
   strip: `+` opens more terminals (the default shell or a profile from
   `list_shells`).
 - Editor: opening a file from the explorer adds a center tab with CodeMirror 6
-  (`src/components/editor/`): line numbers, selection, and syntax highlighting for
-  JS/TS, JSON, Markdown, Rust, and Python. Syntax colors read the theme's ANSI
-  variables, so switching themes recolors code for free; Ctrl/Cmd+S saves through
-  the backend, which caps files at 2 MiB.
+  (`src/components/editor/editor-surface/`): line numbers, selection, and syntax
+  highlighting for the whole catalogue CodeMirror ships — the official language
+  packages, community grammars (Svelte, Nix, C#, Terraform, Zig, Elixir, Make,
+  Solidity), and the classic stream modes, so TSX, Vue, TOML, Dockerfiles,
+  dotfiles, and lock files all highlight. `languages.ts` maps a path to its
+  grammar and every grammar is fetched on demand, so opening a file costs one
+  parser rather than the whole set; Markdown fences highlight the language they
+  name. Colors live in `syntax-style.ts` and read the theme's ANSI variables, so
+  switching themes recolors code for free; Ctrl/Cmd+S saves through the backend,
+  which caps files at 2 MiB.
 - Git: the strip under the file tree holds two entry points, one per end —
   **History** on the left and **Commit** on the right — and either one swaps the
   Files panel for that view (`src/components/git/`, backed by
