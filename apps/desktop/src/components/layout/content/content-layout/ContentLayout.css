@@ -21,6 +21,12 @@
   transition: none;
 }
 
+/* The right panel animates its own width across the row when it goes full
+   screen, so it needs the same drag-time opt-out as the collapsing columns. */
+.content-layout--resizing .right-layout {
+  transition: none;
+}
+
 .content-layout__resizer {
   position: relative;
   flex: 0 0 4px;

@@ -120,6 +120,16 @@ desktop/
   Each provider talks only to the endpoint its own CLI talks to and never starts a
   completion, and agents without such a source stay out of the list rather than
   showing a guess.
+- Right panel: `components/layout/content/right-layout/` carries its own
+  segmented switcher — **Audit** (the ReNonce `Icon-only` mark) and **Docs**
+  (`book.svg`) — with the full-screen toggle ahead of it so it sits on the Audit
+  side. Full screen is `ContentLayout`'s own state: the left column collapses,
+  the right panel takes the row's measured width and the resizer leaves the row,
+  so the panel fills the content area; the icon flips to *exit full screen* and
+  the same button brings the three columns back. Each segment renders its own
+  view — `components/audit/audit-view/` and `components/docs/docs-view/` — and
+  both are heading-only shells (the shared `ui/section-heading`, no icon of its
+  own) until their content is decided.
 - Terminal: the center panel runs xterm.js against a Rust PTY
   (`src-tauri/src/pty.rs`, `portable-pty`). The shell starts in the open folder
   (Unix `$SHELL`; Windows `pwsh` → `powershell` → `cmd`), output streams over a

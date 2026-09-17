@@ -3,7 +3,9 @@
  * @notice Side panel surface using the theme sidebar tokens.
  * @dev Column of header + scrolling content; no side borders — the
  * neighboring resizer paints the separator. Only the content area scrolls, so
- * the header stays put.
+ * the header stays put. The width transition is what makes the full-screen
+ * toggle read as the panel growing across the row; `ContentLayout` disables it
+ * while a resizer is dragged, so the panel still tracks the pointer exactly.
  */
 
 .right-layout {
@@ -13,10 +15,47 @@
   min-width: 0;
   background: var(--sidebar);
   color: var(--sidebar-foreground);
+  transition: width var(--motion-duration, 220ms) var(--motion-easing, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .right-layout__content {
   flex: 1 1 0;
   min-height: 0;
   overflow: auto;
+}
+
+/* Host for the segmented switcher: it fills what the toggle leaves. */
+.right-layout__views {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.right-layout__full-screen {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.right-layout__full-screen:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.right-layout__full-screen:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .right-layout {
+    transition: none;
+  }
 }

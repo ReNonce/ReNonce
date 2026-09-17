@@ -1,0 +1,17 @@
+/**
+ * @title Audit view styles
+ * @notice Heading row on the panel's sidebar surface, matching the Files and
+ * Agent panels' section label.
+ */
+
+.audit-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.audit-view__heading {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px 4px;
+}

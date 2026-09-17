@@ -10,6 +10,10 @@
  * width, so reopening restores the previous size. Sidebars animate through the
  * `Collapse` primitive; transitions are disabled while a resizer is dragged so
  * the panel tracks the pointer exactly.
+ * Full screen on the right panel is a layout state of its own: the left column
+ * collapses, the right one takes the row's exact width (measured, so it stays
+ * flush on window resize) and its resizer leaves the row. The flag is kept
+ * while the panel is hidden, so reopening the sidebar brings back what you had.
  * @return The three-column content element.
  */
 import { useEffect, useRef, useState } from "react";
@@ -53,6 +57,25 @@ export function ContentLayout({ leftSidebarOpen, rightSidebarOpen }: ContentLayo
   const [leftWidth, setLeftWidth] = useState(DEFAULT_LEFT_WIDTH);
   const [rightWidth, setRightWidth] = useState(DEFAULT_RIGHT_WIDTH);
   const [resizing, setResizing] = useState<ResizeSide | null>(null);
+  const [rightFullScreen, setRightFullScreen] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  // The full-screen panel takes the row's exact width, so it stays flush when
+  // the window changes instead of drifting from a percentage.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container === null) {
+      return;
+    }
+    const update = () => setContainerWidth(container.clientWidth);
+    update();
+    if (typeof ResizeObserver === "undefined") {
+      return;
+    }
+    const observer = new ResizeObserver(update);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (resizing === null) {
@@ -118,13 +141,18 @@ export function ContentLayout({ leftSidebarOpen, rightSidebarOpen }: ContentLayo
     }
   };
 
+  // Full screen only counts while the panel is on screen; its switch survives
+  // being hidden so reopening the sidebar comes back to the same layout.
+  const fullScreen = rightFullScreen && rightSidebarOpen;
+  const fullWidth = containerWidth > 0 ? containerWidth : rightWidth;
+
   return (
     <div
       ref={containerRef}
       className={`content-layout${resizing !== null ? " content-layout--resizing" : ""}`}
     >
       <Collapse
-        open={leftSidebarOpen}
+        open={leftSidebarOpen && !fullScreen}
         size={leftWidth + RESIZER_WIDTH}
         className="content-layout__sidebar"
       >
@@ -143,20 +171,26 @@ export function ContentLayout({ leftSidebarOpen, rightSidebarOpen }: ContentLayo
       <CenterLayout />
       <Collapse
         open={rightSidebarOpen}
-        size={rightWidth + RESIZER_WIDTH}
+        size={fullScreen ? fullWidth : rightWidth + RESIZER_WIDTH}
         className="content-layout__sidebar"
       >
-        <div
-          className={`content-layout__resizer${resizing === "right" ? " content-layout__resizer--active" : ""}`}
-          role="separator"
-          aria-orientation="vertical"
-          aria-label="Resize right panel"
-          onPointerDown={startResize("right")}
-          onPointerMove={moveResize}
-          onPointerUp={endResize}
-          onPointerCancel={endResize}
+        {!fullScreen && (
+          <div
+            className={`content-layout__resizer${resizing === "right" ? " content-layout__resizer--active" : ""}`}
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize right panel"
+            onPointerDown={startResize("right")}
+            onPointerMove={moveResize}
+            onPointerUp={endResize}
+            onPointerCancel={endResize}
+          />
+        )}
+        <RightLayout
+          width={fullScreen ? fullWidth : rightWidth}
+          fullScreen={fullScreen}
+          onToggleFullScreen={() => setRightFullScreen((current) => !current)}
         />
-        <RightLayout width={rightWidth} />
       </Collapse>
     </div>
   );
