@@ -5,8 +5,8 @@
  * folders opened most recently. The terminal panel reuses it as its empty state,
  * so both places offer the same next steps.
  * @dev Rows read their bindings from the keymap store, so rebinding updates the
- * hints. The brand mark is the transparent variant, so it disappears on light
- * backgrounds (the Logo component warns in dev).
+ * hints. The brand mark is the transparent variant, which the `Logo` component
+ * inverts on a light theme so it stays readable.
  * @return The welcome element.
  */
 import { openFolder } from "../../../files/commands";

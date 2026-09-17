@@ -94,7 +94,10 @@ desktop/
   `folder_icons/` (per folder name, Catppuccin) render as images — the explorer
   picks one through `<FolderIcon name expanded />`, which swaps to the open
   artwork while a folder is expanded, and falls back to the plain folder for
-  names the table in `folder-icon/folder-icons.ts` does not know.
+  names the table in `folder-icon/folder-icons.ts` does not know. Catppuccin drew
+  the folder set for a dark surface, so `FolderIcon.css` darkens it while the
+  resolved mode is light — same trick as `Logo.css`, which inverts the
+  transparent brand variants that ship white on a light theme.
 - Workspace: the open folder and the auto-save flag live in `src/workspace/`
   (persisted in `renonce.workspace`). The top bar's **Files** menu opens a folder
   through `@tauri-apps/plugin-dialog`, and the Files view lists it with the

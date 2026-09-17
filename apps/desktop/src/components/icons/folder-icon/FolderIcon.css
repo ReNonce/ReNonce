@@ -10,3 +10,10 @@
   flex: 0 0 auto;
   user-select: none;
 }
+
+/* Catppuccin draws these for a dark surface, so the light stroke washes out on
+   a light theme. Darkening keeps every folder's own hue while restoring the
+   contrast the artwork was built with. */
+:root[data-mode="light"] .folder-icon {
+  filter: brightness(0.62) saturate(1.15);
+}

@@ -1,0 +1,13 @@
+/**
+ * @title ReNonce logo styles
+ * @notice Keeps the white transparent artwork readable on a light theme.
+ * @dev The brand ships the transparent variants in white only, so on a light
+ * background they are inverted to the theme's near-black text colour instead of
+ * vanishing. The artwork files stay untouched — this is a render-time tint, not
+ * a re-colour of the assets (see the brand README). The opaque `icon` variant
+ * carries its own background and is never filtered.
+ */
+
+:root[data-mode="light"] .logo--transparent {
+  filter: invert(0.9);
+}

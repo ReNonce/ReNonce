@@ -15,7 +15,7 @@ Total: 18 folders, 162 image files + this README.
 | Variant | Folders | Look | Use for |
 |---|---|---|---|
 | **Icon** | `ReNonce-Icon-*` | White logo on an **opaque black square** (not transparent) | OS app icon, favicon, avatar — safe on any background |
-| **Icon-only** | `ReNonce-Icon-only-*` | White logo alone, **transparent background** | UI on dark backgrounds only (invisible on light ones!) |
+| **Icon-only** | `ReNonce-Icon-only-*` | White logo alone, **transparent background** | UI, usually through `<Logo>` (raw `<img>` use is dark-background only — the component inverts it on light themes). |
 | **Lockup** | `ReNonce-icon-type` | Icon + "ReNonce" wordmark, white on transparent | Header / splash screen on dark backgrounds |
 | **Wordmark** | `ReNonce-Type` | "ReNonce" text only, white on transparent | Next to an icon in dark layouts |
 
@@ -95,8 +95,9 @@ By URL (served from `public/`):
 
 Preferred in-app accessor: the `Logo` component
 (`src/components/brand/logo/Logo.tsx`) — it maps all four variants to their SVG paths,
-scales by `size`, and warns (dev only) when white transparent artwork would
-sit on a light background:
+scales by `size`, and inverts the transparent variants on a light theme (a
+render-time tint driven by `:root[data-mode="light"]` in `Logo.css`; the files
+themselves stay white), so the mark stays readable on either background:
 
 ```tsx
 <Logo variant="lockup" size={32} />

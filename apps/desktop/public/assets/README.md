@@ -26,7 +26,7 @@ The `icons/` SVGs are not uniformly theme-safe (only 2 files use
 |---|---|---|---|
 | A. Black-only | 211 | `stroke`/`fill="black"`, root `fill="none"` | Invisible on dark backgrounds. Tint to the theme foreground (`filter: invert(1)` in dark mode, or inline SVG + `currentColor` override). |
 | B. Baked light colors | 130 | hardcoded `#DCE0E5` / `#C6CAD0` / `white` | Tuned for dark backgrounds; washed out on light ones. Treat as dark-only, or recolor at build time. |
-| C. Coloured file and folder icons | `file_icons/` (per language), `folder_icons/` (per folder name) | fixed per-kind colours | Work on both backgrounds. Never invert or recolor. |
+| C. Coloured file and folder icons | `file_icons/` (per language), `folder_icons/` (per folder name) | fixed per-kind colours | Work on both backgrounds. Never invert or recolor the files; the folder set is darkened at render time on light themes (`FolderIcon.css`) because Catppuccin drew its light stroke for a dark surface. |
 
 Upstream gets away with hardcoded colors because its renderer tints icons
 at draw time; plain web `<img>` cannot do that. Optional cleanup: a one-time
