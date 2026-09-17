@@ -21,6 +21,8 @@ export interface CommandRowProps {
   onSelect: () => void;
   /** Adds a remove control when provided. */
   onRemove?: () => void;
+  /** Accessible name of the remove control (defaults to "Remove <label>"). */
+  removeLabel?: string;
 }
 
 /**
@@ -31,6 +33,7 @@ export interface CommandRowProps {
  * @param props.active Whether the row is keyboard-selected.
  * @param props.onSelect Called when the row is chosen.
  * @param props.onRemove Called when the remove control is used.
+ * @param props.removeLabel Accessible name of the remove control.
  * @return The row element.
  */
 export function CommandRow({
@@ -40,6 +43,7 @@ export function CommandRow({
   active = false,
   onSelect,
   onRemove,
+  removeLabel,
 }: CommandRowProps) {
   const row = (
     <button type="button" className="command-row" data-active={active} onClick={onSelect}>
@@ -61,7 +65,8 @@ export function CommandRow({
       <button
         type="button"
         className="command-row__remove"
-        aria-label={`Remove ${label}`}
+        aria-label={removeLabel ?? `Remove ${label}`}
+        title={removeLabel ?? `Remove ${label}`}
         onClick={onRemove}
       >
         ×

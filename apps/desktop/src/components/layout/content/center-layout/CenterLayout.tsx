@@ -4,8 +4,11 @@
  * plus the stacked terminal surfaces; fills the space between the side panels.
  * @dev `flex: 1 1 0` with `min-width: 0` lets the resizers shrink it down to the
  * minimum enforced in ContentLayout. New sessions start in the open folder.
+ * Agent runs are left out of the strip on purpose: they are navigated from the
+ * Agent panel, so the tabs here stay about files and views.
  * @return The center panel element.
  */
+import { useAgentSessions } from "../../../../agent/sessions";
 import {
   closeAllTerminals,
   closeOtherTerminals,
@@ -27,12 +30,17 @@ export function CenterLayout() {
   const { root } = useWorkspace();
   const sessions = useTerminalSessions();
   const activeId = useActiveTabId();
+  const agentSessions = useAgentSessions();
+
+  // Agent tabs live in the Agent panel, not in this strip.
+  const agentTerminalIds = new Set(agentSessions.map((session) => session.terminalId));
+  const tabs = sessions.filter((session) => !agentTerminalIds.has(session.id));
 
   return (
     <section className="center-layout">
       <PanelHeader>
         <TerminalTabs
-          tabs={sessions.map((session) => ({ id: session.id, label: session.label }))}
+          tabs={tabs.map((session) => ({ id: session.id, label: session.label }))}
           activeId={activeId}
           onSelect={setActiveTerminal}
           onClose={closeTerminal}

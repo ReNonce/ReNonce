@@ -8,7 +8,12 @@
  * simply drops its agent session.
  */
 import { useSyncExternalStore } from "react";
-import { openTerminal, renameSession, setActiveTerminal } from "../terminal/sessions";
+import {
+  closeTerminal,
+  openTerminal,
+  renameSession,
+  setActiveTerminal,
+} from "../terminal/sessions";
 import { setWorkspaceRoot } from "../workspace/workspace";
 import type { AgentCli } from "./agents";
 
@@ -94,4 +99,16 @@ export function openAgentSession(agent: AgentCli, cwd: string | null): AgentSess
 export function focusAgentSession(session: AgentSession): void {
   setActiveTerminal(session.terminalId);
   setWorkspaceRoot(session.cwd);
+}
+
+/**
+ * @notice Ends a run: closes its terminal tab and drops the session.
+ * @dev Closing both together is the point — the terminal is the session, so
+ * leaving it behind would strand a tab that nothing navigates back to.
+ * @param session Session to close.
+ */
+export function closeAgentSession(session: AgentSession): void {
+  closeTerminal(session.terminalId);
+  sessions = sessions.filter((candidate) => candidate.id !== session.id);
+  notify();
 }

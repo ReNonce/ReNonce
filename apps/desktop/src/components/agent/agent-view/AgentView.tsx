@@ -13,12 +13,13 @@ import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { AGENT_CLIS } from "../../../agent/agents";
 import type { AgentCli } from "../../../agent/agents";
 import {
+  closeAgentSession,
   focusAgentSession,
   openAgentSession,
   useAgentSessions,
 } from "../../../agent/sessions";
 import { folderName } from "../../../files/path";
-import { useTerminalSessions } from "../../../terminal/sessions";
+import { useActiveTabId, useTerminalSessions } from "../../../terminal/sessions";
 import { useWorkspace } from "../../../workspace/workspace";
 import { MaskIcon } from "../../icons/mask-icon/MaskIcon";
 import { CommandRow } from "../../command/command-row/CommandRow";
@@ -31,6 +32,7 @@ export function AgentView() {
   const { root } = useWorkspace();
   const sessions = useAgentSessions();
   const terminals = useTerminalSessions();
+  const activeTabId = useActiveTabId();
   const [query, setQuery] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerQuery, setPickerQuery] = useState("");
@@ -128,7 +130,10 @@ export function AgentView() {
             icon={<MaskIcon src={session.iconSrc} />}
             label={session.label}
             hint={session.cwd === null ? undefined : folderName(session.cwd)}
+            active={session.terminalId === activeTabId}
             onSelect={() => focusAgentSession(session)}
+            onRemove={() => closeAgentSession(session)}
+            removeLabel={`Close ${session.label} session`}
           />
         ))}
       </div>
