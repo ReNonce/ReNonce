@@ -10,6 +10,7 @@
   display: flex;
   flex-direction: column;
   padding: 0 0 4px;
+  min-height: 100%;
 }
 
 /* Search, the Quick action header, and the new-entry field stick together at
@@ -22,6 +23,27 @@
   flex-direction: column;
   flex: 0 0 auto;
   background: var(--sidebar);
+}
+
+/* Reserved strip under the tree: sticky so it stays visible while the tree
+   scrolls, pushed to the bottom by the auto margin when the tree is shorter.
+   Empty for now — status and actions land here later. */
+.file-explorer__bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 0 0 auto;
+  margin-top: auto;
+  height: 24px;
+  padding: 0 10px;
+  border-top: 1px solid var(--border);
+  background: var(--sidebar);
+  color: var(--muted-foreground);
+  font-size: 12px;
 }
 
 .file-explorer__actions {

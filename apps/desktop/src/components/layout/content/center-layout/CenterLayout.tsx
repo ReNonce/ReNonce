@@ -11,6 +11,7 @@ import {
   closeOtherTerminals,
   closeTerminal,
   openTerminal,
+  renameSession,
   setActiveTerminal,
   useActiveTabId,
   useTerminalSessions,
@@ -36,6 +37,7 @@ export function CenterLayout() {
           onSelect={setActiveTerminal}
           onClose={closeTerminal}
           onOpen={(shell) => openTerminal(root, shell)}
+          onRename={renameSession}
           onCloseOthers={closeOtherTerminals}
           onCloseAll={closeAllTerminals}
         />

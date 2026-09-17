@@ -5,7 +5,8 @@
  * is null) or a file editor (`path` is set); renaming this module to `tabs/` is
  * tracked as cleanup. Each tab owns its cwd/shell or its file, so switching tabs
  * never loses state. Opening a folder starts the first terminal automatically,
- * and the + button opens more.
+ * and the + button opens more. Tabs carry an automatic label that a rename can
+ * replace (and a blank rename restores).
  */
 import { useSyncExternalStore } from "react";
 import { folderName } from "../files/path";
@@ -38,21 +39,29 @@ function labelFor(cwd: string | null): string {
   return cwd === null ? "Terminal" : folderName(cwd);
 }
 
+/** Automatic tab name: the file, the shell it runs, or the project folder. */
+function defaultLabel(session: TerminalSession): string {
+  if (session.path !== null) {
+    return folderName(session.path);
+  }
+  // A profile tab is named after the shell it runs, a plain tab after the
+  // project folder — so the two kinds are told apart at a glance.
+  return session.shell === null ? labelFor(session.cwd) : folderName(session.shell);
+}
+
 let counter = 0;
 
 function createSession(cwd: string | null, shell: string | null): TerminalSession {
   counter += 1;
-  return {
+  const session: TerminalSession = {
     id: `terminal-${Date.now()}-${counter}`,
     cwd,
     shell,
-    // A profile tab is named after the shell it runs, a plain tab after the
-    // project folder — so the two kinds are told apart at a glance, and the
-    // label is fixed at the start.
-    label: shell === null ? labelFor(cwd) : folderName(shell),
+    label: "",
     path: null,
     mode: "code",
   };
+  return { ...session, label: defaultLabel(session) };
 }
 
 let sessions: TerminalSession[] = [];
@@ -124,6 +133,28 @@ export function setActiveTerminal(id: string): void {
     return;
   }
   activeId = id;
+  notify();
+}
+
+/**
+ * @notice Renames a tab.
+ * @dev Blank names restore the automatic label, so a tab is never nameless.
+ * @param id Tab id; unknown ids are ignored.
+ * @param label New name.
+ */
+export function renameSession(id: string, label: string): void {
+  const session = sessions.find((candidate) => candidate.id === id);
+  if (session === undefined) {
+    return;
+  }
+  const trimmed = label.trim();
+  const next = trimmed === "" ? defaultLabel(session) : trimmed;
+  if (next === session.label) {
+    return;
+  }
+  sessions = sessions.map((candidate) =>
+    candidate.id === id ? { ...candidate, label: next } : candidate,
+  );
   notify();
 }
 

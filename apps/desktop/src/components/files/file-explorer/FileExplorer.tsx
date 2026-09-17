@@ -734,6 +734,9 @@ export function FileExplorer() {
         </>
       )}
 
+      {/* Reserved strip: explorer status and actions land here later. */}
+      <div className="file-explorer__bottom" />
+
       {menu !== null && (
         <ContextMenu
           x={menu.x}
