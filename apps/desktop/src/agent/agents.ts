@@ -85,6 +85,27 @@ export const AGENT_CLIS: AgentCli[] = [
     command: "agy",
     description: "Google's agentic CLI",
   },
+  {
+    key: "crush",
+    label: "Crush",
+    iconSrc: "/assets/icons/agent.svg",
+    command: "crush",
+    description: "Charm's coding agent",
+  },
+  {
+    key: "command-code",
+    label: "Command Code",
+    iconSrc: "/assets/icons/command.svg",
+    command: "command-code",
+    description: "Command Code's coding agent",
+  },
+  {
+    key: "hermes",
+    label: "Hermes",
+    iconSrc: "/assets/icons/agent_two.svg",
+    command: "hermes",
+    description: "Hermes agent",
+  },
 ];
 
 /**
