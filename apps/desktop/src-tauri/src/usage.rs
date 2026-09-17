@@ -206,6 +206,96 @@ fn codex_usage() -> Option<AgentUsage> {
     None
 }
 
+/// Claude's stored OAuth token.
+/// @dev `CLAUDE_CODE_OAUTH_TOKEN` wins when it is set, which is how the CLI itself
+/// can be pointed at a token; otherwise the credentials file Claude Code writes is
+/// read. The macOS keychain, which Orca also supports, is not read here.
+fn claude_token() -> Option<String> {
+    if let Ok(token) = std::env::var("CLAUDE_CODE_OAUTH_TOKEN") {
+        if !token.is_empty() {
+            return Some(token);
+        }
+    }
+    let home = home_dir()?;
+    let text = fs::read_to_string(home.join(".claude").join(".credentials.json")).ok()?;
+    let value: serde_json::Value = serde_json::from_str(&text).ok()?;
+    value
+        .get("claudeAiOauth")?
+        .get("accessToken")?
+        .as_str()
+        .filter(|token| !token.is_empty())
+        .map(str::to_string)
+}
+
+/// One window of the usage payload, where `resets_at` may be ISO or epoch.
+fn claude_window(
+    entry: Option<&serde_json::Value>,
+    label: &str,
+    minutes: u64,
+) -> Option<UsageWindow> {
+    let entry = entry?;
+    let percent = entry
+        .get("utilization")
+        .and_then(serde_json::Value::as_f64)?;
+    let resets_at = match entry.get("resets_at") {
+        Some(serde_json::Value::String(text)) => iso_to_epoch(text),
+        Some(serde_json::Value::Number(number)) => number.as_i64(),
+        _ => None,
+    }
+    .unwrap_or(0);
+    Some(UsageWindow {
+        label: label.to_string(),
+        used_percent: percent.clamp(0.0, 100.0),
+        window_minutes: minutes,
+        resets_at,
+    })
+}
+
+/// Claude's plan windows, from the usage endpoint the CLI's `/usage` calls.
+/// @dev Read-only, and the same request the CLI makes: the stored OAuth token with
+/// the beta header it expects. A token Claude has since replaced answers 401, which
+/// falls back to the statusline mirror.
+async fn claude_oauth_usage() -> Option<AgentUsage> {
+    let token = claude_token()?;
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .ok()?;
+    let response = client
+        .get("https://api.anthropic.com/api/oauth/usage")
+        .bearer_auth(&token)
+        .header("anthropic-beta", "oauth-2025-04-20")
+        .header("User-Agent", "claude-code/2.1.0")
+        .send()
+        .await
+        .ok()?;
+    if !response.status().is_success() {
+        return None;
+    }
+    let body: serde_json::Value = response.json().await.ok()?;
+
+    let mut windows = Vec::new();
+    for (key, label, minutes) in [
+        ("five_hour", "5h", 300_u64),
+        ("seven_day", "7d", 10_080),
+        ("seven_day_opus", "7d opus", 10_080),
+        ("seven_day_sonnet", "7d sonnet", 10_080),
+    ] {
+        if let Some(window) = claude_window(body.get(key), label, minutes) {
+            windows.push(window);
+        }
+    }
+    if windows.is_empty() {
+        return None;
+    }
+    Some(AgentUsage {
+        agent_key: "claude".to_string(),
+        source: "Anthropic usage API".to_string(),
+        windows,
+        read_at: now(),
+    })
+}
+
 /// Reads the plan limits Claude Code only hands to a statusline command.
 /// @dev The mirror file is written by the opt-in wrapper in
 /// `desktop/scripts/claude-usage-mirror.sh`, which forwards the same JSON to the
@@ -710,7 +800,12 @@ async fn kimi_usage() -> Option<AgentUsage> {
 pub async fn agent_usage(agent_key: String) -> Option<AgentUsage> {
     match agent_key.as_str() {
         "codex" => codex_usage(),
-        "claude" => claude_usage(),
+        // Claude is asked the way its CLI asks: the usage endpoint first, and the
+        // statusline mirror only when that cannot be read.
+        "claude" => match claude_oauth_usage().await {
+            Some(usage) => Some(usage),
+            None => claude_usage(),
+        },
         "grok" => grok_usage().await,
         "gemini" => gemini_usage().await,
         // Antigravity has no reader of its own: it shares Google Code Assist
