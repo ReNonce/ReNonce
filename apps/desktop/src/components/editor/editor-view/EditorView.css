@@ -4,7 +4,9 @@
  * @dev Inactive editors stay in the layout with `visibility: hidden` (the same
  * trick as the terminal surfaces) so an unsaved buffer survives tab switches.
  * Gutter and textarea share the same font, size, and line-height so every number
- * lines up with its row.
+ * lines up with its row. In the bar the name and path give way first — both
+ * truncate with an ellipsis — while the Code/View switcher and Save keep their
+ * size, so long text never pushes them around.
  */
 
 .editor-view {
@@ -35,12 +37,21 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 0;
   font-size: 13px;
   font-weight: 600;
 }
 
+/* The name is the first thing to give way; the controls beside it never shrink. */
+.editor-view__name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .editor-view__dirty {
+  flex: 0 0 auto;
   color: var(--muted-foreground);
 }
 

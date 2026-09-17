@@ -70,7 +70,7 @@ export function EditorView({ session, active }: EditorViewProps) {
     <div className="editor-view" data-active={active} aria-hidden={!active}>
       <div className="editor-view__bar">
         <span className="editor-view__title">
-          {session.label}
+          <span className="editor-view__name">{session.label}</span>
           {dirty && (
             <span className="editor-view__dirty" title="Unsaved changes">
               •
