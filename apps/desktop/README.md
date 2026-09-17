@@ -106,11 +106,14 @@ desktop/
   a terminal that launches that CLI, so the run starts in one gesture. Sessions
   are listed under the section heading — selecting one brings its terminal back
   and moves the workspace to the session's folder — and closing the terminal
-  drops its row. The panel's bottom strip holds a **Usage** button: it opens a
-  list of every agent with the rolling limits that can be read from local CLI
-  state (Codex publishes 5-hour and weekly windows in its rollout logs, via
-  `src-tauri/src/usage.rs`), and says "not readable" for agents whose limits only
-  exist inside their own interface rather than estimating a number.
+  drops its row. The panel's bottom strip holds a **Usage** button: it lists the
+  agents that publish an account-level limit — Codex (5-hour and weekly windows
+  from its own rollout logs) and Claude Code (plan windows, through the opt-in
+  statusline mirror in `scripts/claude-usage-mirror.sh`), both read in
+  `src-tauri/src/usage.rs`. Other agents report nothing readable: Grok publishes
+  tokens and cost per session rather than an account limit, Gemini and Copilot
+  keep quota inside their own interface, and opencode reports cost — so they stay
+  out of the list instead of showing a guess.
 - Terminal: the center panel runs xterm.js against a Rust PTY
   (`src-tauri/src/pty.rs`, `portable-pty`). The shell starts in the open folder
   (Unix `$SHELL`; Windows `pwsh` → `powershell` → `cmd`), output streams over a
