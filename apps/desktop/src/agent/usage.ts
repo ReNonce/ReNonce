@@ -46,6 +46,32 @@ export async function readAgentUsage(agentKey: string): Promise<AgentUsage | nul
 }
 
 /**
+ * @notice Why an agent's limits cannot be read right now.
+ * @dev Each agent publishes usage somewhere different, and most keep it inside
+ * their own interface: recorded per provider so the panel can say what would be
+ * needed instead of leaving a bare "not readable". Wording stays short — it is
+ * shown next to the agent.
+ */
+const USAGE_NOTES: Record<string, string> = {
+  codex: "Read from Codex's own rollout logs.",
+  claude:
+    "Claude Code only exposes plan limits to a statusline hook, and none is writing them out yet.",
+  gemini: "Gemini CLI reports quota only inside its interactive interface.",
+  grok: "Grok needs a session id (grok usage <session>), so it has no account-wide number.",
+  opencode: "opencode reports tokens and cost (opencode stats), not plan windows.",
+  copilot: "Copilot CLI does not expose usage to other programs.",
+};
+
+/**
+ * @notice Explanation for a provider without readable data.
+ * @param agentKey Agent key from the catalog.
+ * @return A short sentence, or a generic one for unknown keys.
+ */
+export function usageNote(agentKey: string): string {
+  return USAGE_NOTES[agentKey] ?? "This agent does not publish its usage.";
+}
+
+/**
  * @notice Countdown to a window reset.
  * @param resetsAt Unix seconds.
  * @return Text such as "2h 14m", "3d 4h", or "resetting".

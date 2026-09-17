@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { AGENT_CLIS } from "../../../agent/agents";
-import { readAgentUsage, untilReset, usageLevel } from "../../../agent/usage";
+import { readAgentUsage, untilReset, usageLevel, usageNote } from "../../../agent/usage";
 import type { AgentUsage } from "../../../agent/usage";
 import { MaskIcon } from "../../icons/mask-icon/MaskIcon";
 import { PaletteShell } from "../../palette/palette-shell/PaletteShell";
@@ -127,7 +127,10 @@ export function AgentUsageBar() {
                   <span className="agent-usage__name">{agent.label}</span>
 
                   {entry === null || entry === undefined ? (
-                    <span className="agent-usage__none">
+                    <span
+                      className="agent-usage__none"
+                      title={loaded ? usageNote(agent.key) : undefined}
+                    >
                       {loaded ? "not readable" : "checking…"}
                     </span>
                   ) : (
