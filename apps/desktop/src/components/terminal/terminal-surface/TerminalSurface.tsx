@@ -15,6 +15,7 @@ import { Terminal } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 import type { TerminalSession } from "../../../terminal/sessions";
 import { takeInitialCommand } from "../../../terminal/sessions";
+import { notifyAgentExit } from "../../../agent/sessions";
 import type { TerminalColors, ThemeColors } from "../../../theme/types";
 import { useTheme } from "../../../theme/useTheme";
 import "./TerminalSurface.css";
@@ -161,6 +162,10 @@ export function TerminalSurface({ session, active }: TerminalSurfaceProps) {
         term.write(decodeBase64(event.data));
       } else if (event.kind === "exit") {
         term.write("\r\n\x1b[2m[process exited]\x1b[0m\r\n");
+        // An agent CLI that quit should not leave a dead terminal behind, and its
+        // session row stays in the agent panel to be resumed from there. Plain
+        // shell terminals are untouched.
+        notifyAgentExit(id);
       } else if (event.kind === "error") {
         term.write(`\r\n\x1b[31m[renonce] ${event.message ?? "pty error"}\x1b[0m\r\n`);
       }

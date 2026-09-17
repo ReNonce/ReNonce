@@ -88,6 +88,32 @@ export const AGENT_CLIS: AgentCli[] = [
 ];
 
 /**
+ * Arguments that make a CLI pick up its most recent session in the working
+ * folder — how these CLIs scope a conversation to a project.
+ * @dev Verified against each CLI's own `--help`. A key that is absent means the
+ * CLI has no such flag, and resuming then starts the agent fresh instead of
+ * guessing at an argument that would not be understood.
+ */
+const RESUME_ARGS: Record<string, string> = {
+  claude: "--continue",
+  codex: "resume --last",
+  copilot: "--continue",
+  gemini: "--resume latest",
+  grok: "--resume",
+  kimi: "--continue",
+  opencode: "--continue",
+};
+
+/**
+ * @notice Arguments that resume an agent's last session.
+ * @param key Catalog key of the agent.
+ * @return The argument string, or null when the CLI cannot resume.
+ */
+export function resumeArgsFor(key: string): string | null {
+  return RESUME_ARGS[key] ?? null;
+}
+
+/**
  * @notice Looks an agent up by key.
  * @param key Catalog key.
  * @return The entry, or undefined for an unknown key.

@@ -15,6 +15,7 @@ import {
   setActiveTerminal,
 } from "../terminal/sessions";
 import { setWorkspaceRoot } from "../workspace/workspace";
+import { agentByKey, resumeArgsFor } from "./agents";
 import type { AgentCli } from "./agents";
 
 export interface AgentSession {
@@ -28,7 +29,7 @@ export interface AgentSession {
   iconSrc: string;
   /** Folder the run happens in; also what the workspace switches to. */
   cwd: string | null;
-  /** Terminal tab backing this run. */
+  /** Terminal tab backing this run; empty once the CLI has exited. */
   terminalId: string;
 }
 
@@ -90,25 +91,69 @@ export function openAgentSession(agent: AgentCli, cwd: string | null): AgentSess
 }
 
 /**
- * @notice Brings a run back on screen.
- * @dev Activating its terminal tab is what the center shows; moving the
- * workspace to the session's folder is what makes the run self-contained —
- * the explorer, terminals, and breadcrumb all follow it.
- * @param session Session to focus.
+ * @notice Brings a run back on screen, resuming its CLI when it has stopped.
+ * @dev Activating its terminal tab is what the center shows; moving the workspace
+ * to the session's folder is what makes the run self-contained — the explorer,
+ * terminals, and breadcrumb all follow it. A session whose CLI exited has no
+ * terminal left, so one is opened in the same folder and the CLI is asked to
+ * continue its most recent conversation there.
+ * @param session Session to focus or resume.
  */
 export function focusAgentSession(session: AgentSession): void {
-  setActiveTerminal(session.terminalId);
+  if (session.terminalId !== "") {
+    setActiveTerminal(session.terminalId);
+    setWorkspaceRoot(session.cwd);
+    return;
+  }
+  const agent = agentByKey(session.agentKey);
+  if (agent === undefined) {
+    return;
+  }
+  counter += 1;
+  const resume = resumeArgsFor(agent.key);
+  const command = resume === null ? agent.command : `${agent.command} ${resume}`;
+  const terminalId = openTerminal(session.cwd, null, command);
+  renameSession(terminalId, agent.label);
+  sessions = sessions.map((candidate) =>
+    candidate.id === session.id ? { ...candidate, terminalId } : candidate,
+  );
   setWorkspaceRoot(session.cwd);
+  notify();
+}
+
+/**
+ * @notice Marks the session behind a terminal as no longer running.
+ * @dev Called when a terminal's process exits. The tab is closed — a CLI that
+ * quit should not leave a dead terminal behind — while the row stays, so the
+ * conversation can be resumed from the panel. Only sessions this layer owns are
+ * touched, so a plain shell terminal keeps the behaviour it had.
+ * @param terminalId Terminal whose process exited.
+ * @return True when an agent session was marked dormant.
+ */
+export function notifyAgentExit(terminalId: string): boolean {
+  const session = sessions.find((candidate) => candidate.terminalId === terminalId);
+  if (session === undefined) {
+    return false;
+  }
+  sessions = sessions.map((candidate) =>
+    candidate.id === session.id ? { ...candidate, terminalId: "" } : candidate,
+  );
+  closeTerminal(terminalId);
+  notify();
+  return true;
 }
 
 /**
  * @notice Ends a run: closes its terminal tab and drops the session.
- * @dev Closing both together is the point — the terminal is the session, so
- * leaving it behind would strand a tab that nothing navigates back to.
+ * @dev Closing both together is the point — the terminal is the run, so leaving
+ * it behind would strand a tab that nothing navigates back to. A session that
+ * already stopped has no terminal to close.
  * @param session Session to close.
  */
 export function closeAgentSession(session: AgentSession): void {
-  closeTerminal(session.terminalId);
+  if (session.terminalId !== "") {
+    closeTerminal(session.terminalId);
+  }
   sessions = sessions.filter((candidate) => candidate.id !== session.id);
   notify();
 }

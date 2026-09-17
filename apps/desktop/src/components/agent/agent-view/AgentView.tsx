@@ -19,7 +19,7 @@ import {
   useAgentSessions,
 } from "../../../agent/sessions";
 import { folderName } from "../../../files/path";
-import { useActiveTabId, useTerminalSessions } from "../../../terminal/sessions";
+import { useActiveTabId } from "../../../terminal/sessions";
 import { useWorkspace } from "../../../workspace/workspace";
 import { MaskIcon } from "../../icons/mask-icon/MaskIcon";
 import { CommandRow } from "../../command/command-row/CommandRow";
@@ -32,7 +32,6 @@ import "./AgentView.css";
 export function AgentView() {
   const { root } = useWorkspace();
   const sessions = useAgentSessions();
-  const terminals = useTerminalSessions();
   const activeTabId = useActiveTabId();
   const [query, setQuery] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -47,10 +46,9 @@ export function AgentView() {
       .catch(() => undefined);
   }, []);
 
-  // A closed terminal takes its agent session with it.
-  const live = sessions.filter((session) =>
-    terminals.some((terminal) => terminal.id === session.terminalId),
-  );
+  // A row outlives its terminal: when a CLI exits, the terminal closes but the
+  // row stays so the conversation can be picked up again from here.
+  const live = sessions;
   const needle = query.trim().toLowerCase();
   const visible =
     needle === ""
