@@ -26,7 +26,7 @@ The `icons/` SVGs are not uniformly theme-safe (only 2 files use
 |---|---|---|---|
 | A. Black-only | 211 | `stroke`/`fill="black"`, root `fill="none"` | Invisible on dark backgrounds. Tint to the theme foreground (`filter: invert(1)` in dark mode, or inline SVG + `currentColor` override). |
 | B. Baked light colors | 130 | hardcoded `#DCE0E5` / `#C6CAD0` / `white` | Tuned for dark backgrounds; washed out on light ones. Treat as dark-only, or recolor at build time. |
-| C. Multicolor file icons | `file_icons/` brand colors | fixed per-language colors | Work on both backgrounds. Never invert or recolor. |
+| C. Coloured file and folder icons | `file_icons/` (per language), `folder_icons/` (per folder name) | fixed per-kind colours | Work on both backgrounds. Never invert or recolor. |
 
 Upstream gets away with hardcoded colors because its renderer tints icons
 at draw time; plain web `<img>` cannot do that. Optional cleanup: a one-time
@@ -52,6 +52,7 @@ licenses.
 | Directory | Contents | License |
 |---|---|---|
 | `icons/` | ~300 UI/file-type `.svg` icons | ISC for Lucide portions (see `icons/LICENSES`). Upstream-original icons without a separate license file fall under the upstream GPL-3.0-or-later. Upstream-prefixed filenames were renamed to neutral names. |
+| `icons/folder_icons/` | 228 folder icons — a closed and an open file per folder kind | MIT — Catppuccin Icons (`folder_icons/LICENSE`), taken from `@iconify-json/catppuccin` 1.2.17. |
 | `fonts/` | Lilex + IBM Plex Sans (`.ttf`) | OFL (see `fonts/lilex/OFL.txt`, `fonts/ibm-plex-sans/license.txt`). |
 | `sounds/` | 8 call/agent `.wav` effects | Upstream GPL-3.0-or-later (no separate license file). |
 
@@ -75,12 +76,20 @@ cp -r /tmp/collect-src/assets/{icons,fonts,sounds} \
 git -C /tmp/collect-src2 show \
   <pinned-commit>:src/modules/theme/themes/<name>.ts \
   > apps/desktop/src/theme/themes/<name>.ts
+
+# folder icons (third upstream: Catppuccin) — one SVG per `folder-*` body,
+# plus every `folder-*-open` twin, named folder_<key>.svg / folder_<key>_open.svg
+npm pack @iconify-json/catppuccin && tar -xzf iconify-json-catppuccin-*.tgz
 ```
 
 Then re-apply the scrubbing on icons (rename upstream-prefixed files),
 verify themes are still byte-identical (`cmp` against upstream blobs),
 update the pinned commits above, and re-check the license table —
 upstream may add files under different terms.
+
+The folder icon names (`src`, `tests`, `.github`, …) come from terax-ai's
+`src/modules/explorer/lib/folderIcons.ts`; the same table lives in
+`src/components/icons/folder-icon/folder-icons.ts`.
 
 ## Rules
 

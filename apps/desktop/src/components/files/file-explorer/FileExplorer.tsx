@@ -33,6 +33,7 @@ import {
 import { folderName } from "../../../files/path";
 import { openFileTab, openTerminal } from "../../../terminal/sessions";
 import { useWorkspace } from "../../../workspace/workspace";
+import { FolderIcon } from "../../icons/folder-icon/FolderIcon";
 import { MaskIcon } from "../../icons/mask-icon/MaskIcon";
 import { GitCommitView } from "../../git/git-commit/GitCommitView";
 import { GitHistoryView } from "../../git/git-history/GitHistoryView";
@@ -228,7 +229,7 @@ function DirectoryNode({ entry, depth, refreshToken, tree }: NodeProps) {
         onClick={() => void toggle()}
       >
         <Chevron open={expanded} />
-        <MaskIcon src="/assets/icons/folder.svg" />
+        <FolderIcon name={entry.name} expanded={expanded} />
         <span className="file-explorer__name">{entry.name}</span>
       </button>
       {tree.draft?.mode === "rename" && tree.draft.from === entry.path && (
@@ -685,7 +686,11 @@ export function FileExplorer() {
               title={entry.path}
               onClick={() => openFileTab(entry.path)}
             >
-              <MaskIcon src={entry.isDir ? "/assets/icons/folder.svg" : "/assets/icons/file.svg"} />
+              {entry.isDir ? (
+                <FolderIcon name={folderName(entry.path)} />
+              ) : (
+                <MaskIcon src="/assets/icons/file.svg" />
+              )}
               <span className="file-explorer__name">{relativeTo(root, entry.path)}</span>
             </button>
           ))}

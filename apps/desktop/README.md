@@ -89,7 +89,12 @@ desktop/
   Lilex for monospaced content.
 - Icons: the collected set in `public/assets/icons/` covers most needs and is
   rendered through `<MaskIcon />`; `@phosphor-icons/react` is installed as the
-  fallback for anything the set lacks. Both inherit `currentColor`.
+  fallback for anything the set lacks. Both inherit `currentColor`. The two
+  coloured sets keep their own palette instead: `file_icons/` (per language) and
+  `folder_icons/` (per folder name, Catppuccin) render as images — the explorer
+  picks one through `<FolderIcon name expanded />`, which swaps to the open
+  artwork while a folder is expanded, and falls back to the plain folder for
+  names the table in `folder-icon/folder-icons.ts` does not know.
 - Workspace: the open folder and the auto-save flag live in `src/workspace/`
   (persisted in `renonce.workspace`). The top bar's **Files** menu opens a folder
   through `@tauri-apps/plugin-dialog`, and the Files view lists it with the

@@ -1,0 +1,12 @@
+/**
+ * @title Folder icon styles
+ * @notice Sizing and layout for the coloured folder artwork.
+ * @dev The image keeps its own colours, so nothing here paints it — the rules
+ * only stop the icon from stretching inside a flex row.
+ */
+
+.folder-icon {
+  display: block;
+  flex: 0 0 auto;
+  user-select: none;
+}
