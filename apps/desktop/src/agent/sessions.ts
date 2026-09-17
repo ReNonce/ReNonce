@@ -75,7 +75,9 @@ export function getAgentSessions(): AgentSession[] {
  */
 export function openAgentSession(agent: AgentCli, cwd: string | null): AgentSession {
   counter += 1;
-  const terminalId = openTerminal(cwd, null, agent.command);
+  // `exec` makes the CLI the terminal's process rather than a job inside a shell,
+  // so quitting it ends the PTY — which is what tells us the run has stopped.
+  const terminalId = openTerminal(cwd, null, `exec ${agent.command}`);
   // The tab is named after the agent, so the strip reads "Codex CLI" rather
   // than the folder the session happens to run in.
   renameSession(terminalId, agent.label);
@@ -119,7 +121,7 @@ export function focusAgentSession(session: AgentSession): void {
       const args = resumeArgsFor(agent.key);
       return args === null ? agent.command : `${agent.command} ${args}`;
     })();
-  const terminalId = openTerminal(session.cwd, null, resume);
+  const terminalId = openTerminal(session.cwd, null, `exec ${resume}`);
   renameSession(terminalId, agent.label);
   sessions = sessions.map((candidate) =>
     candidate.id === session.id ? { ...candidate, terminalId } : candidate,
